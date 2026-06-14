@@ -1,4 +1,4 @@
-# Sponsor HackDiabetes26
+x# Sponsor HackDiabetes26
 
 **An in-person hackathon by the Nightscout Foundation**
 📍 [Venue / Vancouver, BC, Canada] · 🗓️ [Nov 14-16, 2026] · ⏱️ [72 hours]
@@ -22,7 +22,7 @@ Sponsors can get genuine face time with every participant, and your support is v
 - **Align with a mission people believe in.** The #WeAreNotWaiting community is loyal and grateful to the partners who show up for them.
 - **Fund real impact.** Sponsorship keeps the event affordable for participants and supports the Foundation's open-source work year-round.
 
-> As a registered nonprofit, your contribution to hackdiabetes may be tax-deductible — we'll provide the appropriate documentation. *501(c)(3) Chartiable Organisation*
+> As a registered nonprofit, your contribution to hackdiabetes may be tax-deductible — we'll provide the appropriate documentation. *501(c)(3) Charitable Organisation*
 
 ---
 
