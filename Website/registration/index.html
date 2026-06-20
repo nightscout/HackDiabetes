@@ -1516,5 +1516,22 @@
                 <a href="https://www.marriott.com/en-us/hotels/yvrjw-jw-marriott-parq-vancouver/overview/" target="_blank">JW Marriott Parq Vancouver</a>
             </p>
         </footer>
+        <script>
+            (function () {
+                var AVAILABILITY_URL = "https://script.google.com/macros/s/AKfycbyXAjvcGX2SrJihyh8V1tDI-6fimch-G55WfzvDbvE7PHcX3110khGK6ORJDDZ_aVsfCA/exec";
+                fetch(AVAILABILITY_URL)
+                    .then(function (r) { return r.json(); })
+                    .then(function (counts) {
+                        var BEDS = 2;
+                        var totalFree = 0;
+                        Object.keys(counts).forEach(function (key) {
+                            totalFree += Math.max(0, BEDS - (counts[key] || 0));
+                        });
+                        var el = document.getElementById("heroFree");
+                        if (el) el.textContent = totalFree;
+                    })
+                    .catch(function () {});
+            })();
+        </script>
     </body>
 </html>
