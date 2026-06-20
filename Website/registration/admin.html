@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Room Status — HackDiabetes 26 Admin</title>
+  <style>
+    :root {
+      --dark:    #0e1117;
+      --dark2:   #161b26;
+      --dark3:   #1e2535;
+      --green:   #27c55e;
+      --green2:  #1ea34f;
+      --orange:  #f05a3e;
+      --muted:   rgba(255,255,255,.4);
+      --border:  rgba(255,255,255,.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--dark2);
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--dark);
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .header-left { display: flex; align-items: center; gap: 1rem; }
+    .header-left img { height: 28px; opacity: .9; }
+    .header-title { font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.6); }
+    .refresh-btn {
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background .15s;
+    }
+    .refresh-btn:hover { background: #2a3347; }
+    .refresh-icon { font-size: 14px; display: inline-block; }
+    .refresh-icon.spinning { animation: spin .6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .main { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+
+    /* Summary bar */
+    .summary {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+    }
+    .stat-card {
+      background: var(--dark);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.75rem;
+      flex: 1;
+      min-width: 140px;
+    }
+    .stat-card .val { font-size: 36px; font-weight: 900; line-height: 1; letter-spacing: -.03em; }
+    .stat-card .lbl { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+    .val.green { color: var(--green); }
+    .val.orange { color: var(--orange); }
+    .val.white { color: #fff; }
+
+    /* Room grid */
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+    .room-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+    .room-tile {
+      background: var(--dark);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1rem;
+      text-align: center;
+      transition: border-color .2s;
+    }
+    .room-tile.full   { border-color: rgba(240,90,62,.4);  background: rgba(240,90,62,.06); }
+    .room-tile.half   { border-color: rgba(255,170,0,.35); background: rgba(255,170,0,.05); }
+    .room-tile.empty  { border-color: rgba(39,197,94,.25); background: rgba(39,197,94,.04); }
+
+    .room-id { font-size: 18px; font-weight: 900; letter-spacing: -.01em; margin-bottom: 8px; }
+    .room-tile.full  .room-id { color: var(--orange); }
+    .room-tile.half  .room-id { color: #ffaa00; }
+    .room-tile.empty .room-id { color: var(--green); }
+
+    .bed-row { display: flex; justify-content: center; gap: 5px; margin-bottom: 8px; }
+    .bed {
+      width: 22px; height: 22px; border-radius: 4px;
+      border: 1.5px solid rgba(255,255,255,.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+    }
+    .bed.booked { background: var(--orange); border-color: var(--orange); }
+    .bed.free   { background: rgba(255,255,255,.06); }
+
+    .room-status {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .room-tile.full  .room-status { color: var(--orange); }
+    .room-tile.half  .room-status { color: #ffaa00; }
+    .room-tile.empty .room-status { color: var(--green); }
+
+    .last-updated {
+      margin-top: 2rem;
+      font-size: 11px;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    .error-msg {
+      background: rgba(240,90,62,.12);
+      border: 1px solid rgba(240,90,62,.3);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      color: var(--orange);
+      font-size: 14px;
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <img src="images/hackdiabetes.png" alt="HackDiabetes" onerror="this.style.display='none'" />
+    <span class="header-title">Room Status · Admin</span>
+  </div>
+  <button class="refresh-btn" onclick="load()">
+    <span class="refresh-icon" id="refreshIcon">↻</span> Refresh
+  </button>
+</header>
+
+<div class="main">
+  <div class="error-msg" id="errorMsg">Failed to load data — check your connection and try again.</div>
+
+  <div class="summary">
+    <div class="stat-card"><div class="val green" id="statFree">—</div><div class="lbl">Beds available</div></div>
+    <div class="stat-card"><div class="val orange" id="statBooked">—</div><div class="lbl">Beds booked</div></div>
+    <div class="stat-card"><div class="val white" id="statRooms">—</div><div class="lbl">Rooms with space</div></div>
+    <div class="stat-card"><div class="val white" id="statFull">—</div><div class="lbl">Rooms full</div></div>
+  </div>
+
+  <div class="section-title">All rooms</div>
+  <div class="room-grid" id="roomGrid"></div>
+  <div class="last-updated" id="lastUpdated"></div>
+</div>
+
+<script>
+  var AVAILABILITY_URL = "https://script.google.com/macros/s/AKfycbzUF0-U5j1pVDpzeyrYyJD1HQ8MptA69ZEjL_edOYy8NrA61DMytDtN1HwBD1rvi60LUA/exec";
+  var BEDS = 2;
+
+  function load() {
+    var icon = document.getElementById('refreshIcon');
+    icon.classList.add('spinning');
+    document.getElementById('errorMsg').style.display = 'none';
+
+    fetch(AVAILABILITY_URL)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        icon.classList.remove('spinning');
+        render(data);
+        document.getElementById('lastUpdated').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+      })
+      .catch(function() {
+        icon.classList.remove('spinning');
+        document.getElementById('errorMsg').style.display = 'block';
+      });
+  }
+
+  function render(data) {
+    var totalBooked = 0, totalFree = 0, roomsFull = 0, roomsWithSpace = 0;
+    var grid = document.getElementById('roomGrid');
+    grid.innerHTML = '';
+
+    var keys = Object.keys(data).sort();
+    keys.forEach(function(key) {
+      var booked = data[key];
+      var free = BEDS - booked;
+      totalBooked += booked;
+      totalFree += free;
+      if (booked >= BEDS) roomsFull++;
+      else roomsWithSpace++;
+
+      var cls = booked >= BEDS ? 'full' : booked > 0 ? 'half' : 'empty';
+      var statusText = booked >= BEDS ? 'Full' : booked === 1 ? '1 bed left' : '2 beds free';
+
+      var beds = '';
+      for (var i = 0; i < BEDS; i++) {
+        beds += '<div class="bed ' + (i < booked ? 'booked' : 'free') + '"></div>';
+      }
+
+      grid.innerHTML += '<div class="room-tile ' + cls + '">' +
+        '<div class="room-id">' + key + '</div>' +
+        '<div class="bed-row">' + beds + '</div>' +
+        '<div class="room-status">' + statusText + '</div>' +
+        '</div>';
+    });
+
+    document.getElementById('statFree').textContent   = totalFree;
+    document.getElementById('statBooked').textContent = totalBooked;
+    document.getElementById('statRooms').textContent  = roomsWithSpace;
+    document.getElementById('statFull').textContent   = roomsFull;
+  }
+
+  load();
+  // Auto-refresh every 60 seconds
+  setInterval(load, 60000);
+</script>
+</body>
+</html>
