@@ -351,6 +351,7 @@
             }
             .tag-green { background: #d1fae5; color: #065f46; }
             .tag-orange { background: #fee2e2; color: #991b1b; }
+            .tag-grey { background: #f3f4f6; color: #6b7280; }
             .rtb-title {
                 font-size: 15px;
                 font-weight: 800;
@@ -1347,9 +1348,35 @@
                             var n = counts[key] || 0;
                             r.state = n >= 2 ? "full" : n === 1 ? "partial" : "available";
                         });
-                        renderGrid();
+                        var totalFree = rooms.reduce(function (acc, r) {
+                            return acc + (r.state === "available" ? 2 : r.state === "partial" ? 1 : 0);
+                        }, 0);
+                        if (totalFree === 0) {
+                            handleFullyBooked();
+                        } else {
+                            renderGrid();
+                        }
                     })
                     .catch(function () { renderGrid(); });
+            }
+
+            function handleFullyBooked() {
+                var btnDouble = document.getElementById("btnDouble");
+                btnDouble.disabled = true;
+                btnDouble.style.opacity = "0.4";
+                btnDouble.style.cursor = "not-allowed";
+                btnDouble.style.pointerEvents = "none";
+                btnDouble.querySelector(".rtb-tag").textContent = "Fully booked";
+                btnDouble.querySelector(".rtb-tag").className = "rtb-tag tag-grey";
+                btnDouble.querySelector(".rtb-desc").textContent = "All complimentary double rooms have been claimed.";
+                setRoomType("single");
+                document.getElementById("btnSingle").className = "room-type-btn active-orange";
+                var notice = document.createElement("div");
+                notice.style.cssText = "background:#fff7ed;border:1.5px solid #fed7aa;border-left:4px solid var(--orange);border-radius:8px;padding:1rem 1.25rem;font-size:13px;color:#92400e;margin-bottom:1.5rem;line-height:1.6";
+                notice.innerHTML = "<strong style='display:block;margin-bottom:3px;color:var(--orange2)'>All double rooms are fully booked.</strong>You can still register for HackDiabetes 26 — book a single room directly with the JW Marriott Parq Vancouver.";
+                document.getElementById("doubleSection").style.display = "none";
+                document.getElementById("singleSection").style.display = "";
+                document.getElementById("roomChoiceSection").insertBefore(notice, document.getElementById("roomChoiceSection").firstChild);
             }
 
             function renderGrid() {
