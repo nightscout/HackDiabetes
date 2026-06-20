@@ -917,10 +917,18 @@
                         <!-- Shown when this email has a pre-reserved room -->
                         <div id="reservationNotice" style="display: none" class="reservation-notice">
                             <div class="res-icon">🏨</div>
-                            <div>
+                            <div style="flex:1">
                                 <div class="res-title">A room has been reserved for you</div>
                                 <div class="res-room" id="resRoomLabel">—</div>
                                 <div class="res-by" id="resByLabel">—</div>
+                                <div style="display:flex;gap:10px;margin-top:1rem;flex-wrap:wrap">
+                                    <button class="btn btn-primary" style="font-size:13px;padding:8px 18px" onclick="acceptReservation()">
+                                        Accept this room
+                                    </button>
+                                    <button class="btn btn-ghost" style="font-size:13px;padding:8px 18px;border-color:rgba(255,255,255,.2);color:#374151" onclick="declineReservation()">
+                                        Choose a different room
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -1300,6 +1308,18 @@
                         reservedRoom = null;
                         callback();
                     });
+            }
+
+            function acceptReservation() {
+                var btns = document.querySelector("#reservationNotice [style*='margin-top']");
+                if (btns) btns.innerHTML = '<span style="font-size:13px;font-weight:700;color:var(--green)">✓ Room accepted</span>';
+            }
+
+            function declineReservation() {
+                reservedRoom = null;
+                reservedBy = null;
+                document.getElementById("reservationNotice").style.display = "none";
+                document.getElementById("roomChoiceSection").style.display = "";
             }
 
             // ── Validation ──
