@@ -1600,12 +1600,21 @@
                         </div>
 
                         <div class="btn-row">
-                            <button
-                                class="btn btn-ghost btn-back"
-                                onclick="goTo(2)"
-                            >
-                                Back
-                            </button>
+                            <div style="display:flex;gap:10px">
+                                <button
+                                    class="btn btn-ghost btn-back"
+                                    onclick="goTo(2)"
+                                >
+                                    Back
+                                </button>
+                                <button
+                                    class="btn btn-ghost"
+                                    onclick="editDetails()"
+                                    style="border-color:var(--orange);color:var(--orange)"
+                                >
+                                    ✎ Edit details
+                                </button>
+                            </div>
                             <button
                                 class="btn btn-submit"
                                 id="submitBtn"
@@ -1716,6 +1725,7 @@
             var selectedRoomId = null;
             var reservedRoom = null;
             var reservedBy = null;
+            var editingDetails = false;
 
             var rooms = Array.from({ length: 15 }, function (_, i) {
                 return { id: i + 1, state: "available" };
@@ -1829,9 +1839,34 @@
                     });
             }
 
+            function editDetails() {
+                editingDetails = true;
+                var btn = document.getElementById("step1Btn");
+                btn.textContent = "Back to review →";
+                document.getElementById("panel" + currentStep).classList.remove("active");
+                document.getElementById("panel1").classList.add("active");
+                ["st1","st2","st3"].forEach(function(id,i){
+                    var el = document.getElementById(id);
+                    el.classList.remove("active","done");
+                    if (i === 0) el.classList.add("active");
+                    else el.classList.add("done");
+                });
+                document.getElementById("swLine").style.width = "50%";
+                currentStep = 1;
+                var wizard = document.getElementById("register");
+                if (wizard) wizard.scrollIntoView({ behavior:"smooth", block:"start" });
+            }
+
             function verifyAndContinue() {
                 if (!validateStep1()) return;
                 if (ticketVerified) {
+                    if (editingDetails) {
+                        editingDetails = false;
+                        document.getElementById("step1Btn").textContent = "Continue to room choice";
+                        populateReview();
+                        goTo(3);
+                        return;
+                    }
                     checkReservation(g("email"), function () {
                         goTo(2);
                     });
