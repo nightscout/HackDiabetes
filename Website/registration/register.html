@@ -988,17 +988,17 @@
                                     <div class="field-grid">
                                         <div class="field span2">
                                             <label>Roommate situation</label>
-                                            <select id="matchPref">
+                                            <select id="matchPref" onchange="updateRoommateFields()">
                                                 <option value="Please match me with another attendee">Match me with someone — I don't have a roommate in mind</option>
                                                 <option value="I am nominating a roommate above">I have someone in mind — I'll enter their details below</option>
                                                 <option value="I have already coordinated with my roommate">We've already sorted it — my roommate knows to register this room</option>
                                             </select>
                                         </div>
-                                        <div class="field">
+                                        <div class="field" id="roommateNameField" style="display:none">
                                             <label>Their name <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--light)">(optional)</span></label>
                                             <input type="text" id="roommateName" placeholder="Full name" />
                                         </div>
-                                        <div class="field">
+                                        <div class="field" id="roommateEmailField" style="display:none">
                                             <label>Their email <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--light)">(optional)</span></label>
                                             <input type="email" id="roommateEmail" placeholder="their@email.com" />
                                         </div>
@@ -1423,6 +1423,12 @@
                 });
             }
 
+            function updateRoommateFields() {
+                var show = document.getElementById("matchPref").value === "I am nominating a roommate above";
+                document.getElementById("roommateNameField").style.display = show ? "" : "none";
+                document.getElementById("roommateEmailField").style.display = show ? "" : "none";
+            }
+
             function pickRoom(id) {
                 selectedRoomId = id;
                 document.getElementById("roomErr").classList.remove("show");
@@ -1436,13 +1442,12 @@
                     Array.from(sel.options).forEach(function (opt) {
                         opt.hidden = opt.value !== "I have already coordinated with my roommate";
                     });
-                    document.getElementById("roommateName").closest(".field").style.display = "none";
-                    document.getElementById("roommateEmail").closest(".field").style.display = "none";
+                    document.getElementById("roommateNameField").style.display = "none";
+                    document.getElementById("roommateEmailField").style.display = "none";
                 } else {
                     Array.from(sel.options).forEach(function (opt) { opt.hidden = false; });
                     sel.value = "Please match me with another attendee";
-                    document.getElementById("roommateName").closest(".field").style.display = "";
-                    document.getElementById("roommateEmail").closest(".field").style.display = "";
+                    updateRoommateFields();
                 }
             }
 
