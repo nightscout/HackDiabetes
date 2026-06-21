@@ -951,6 +951,14 @@
                                         with the JW Marriott Parq Vancouver.
                                     </div>
                                 </button>
+                                <button class="room-type-btn" id="btnNone" onclick="setRoomType('none')">
+                                    <div class="rtb-tag tag-grey">No cost</div>
+                                    <div class="rtb-title">No room needed</div>
+                                    <div class="rtb-desc">
+                                        I'm sorting my own accommodation and
+                                        don't need a room through the event.
+                                    </div>
+                                </button>
                             </div>
 
                             <!-- Double room section -->
@@ -1331,6 +1339,7 @@
             }
             function validateStep2() {
                 if (reservedRoom) return true;
+                if (roomType === "none") return true;
                 if (roomType === "double" && !selectedRoomId) {
                     document.getElementById("roomErr").classList.add("show");
                     return false;
@@ -1350,9 +1359,10 @@
                 roomType = type;
                 document.getElementById("btnDouble").className = "room-type-btn" + (type === "double" ? " active" : "");
                 document.getElementById("btnSingle").className = "room-type-btn" + (type === "single" ? " active-orange" : "");
+                document.getElementById("btnNone").className = "room-type-btn" + (type === "none" ? " active" : "");
                 document.getElementById("doubleSection").style.display = type === "double" ? "" : "none";
                 document.getElementById("singleSection").style.display = type === "single" ? "" : "none";
-                if (type === "single") {
+                if (type !== "double") {
                     selectedRoomId = null;
                     renderGrid();
                 }
@@ -1497,6 +1507,13 @@
                     document.getElementById("rv-match").textContent = g("matchPref") || document.getElementById("matchPref").value;
                     document.getElementById("rv-match-row").style.display = "";
                     document.getElementById("singleHotelNote").style.display = "none";
+                } else if (roomType === "none") {
+                    document.getElementById("reviewRoomVal").textContent = "No room";
+                    document.getElementById("reviewFreeBadge").style.display = "none";
+                    document.getElementById("rv-roomtype").textContent = "No room — own accommodation";
+                    document.getElementById("rv-roommate-row").style.display = "none";
+                    document.getElementById("rv-match-row").style.display = "none";
+                    document.getElementById("singleHotelNote").style.display = "none";
                 } else {
                     document.getElementById("reviewRoomVal").textContent = "Single room";
                     document.getElementById("reviewFreeBadge").style.display = "none";
@@ -1513,11 +1530,14 @@
                 var email = g("email");
                 var ticket = g("ticketId");
                 var isSingle = roomType === "single";
-                var roomLabel = isSingle
-                    ? "Single room (self-book via Marriott)"
-                    : reservedRoom
-                        ? "Room " + reservedRoom
-                        : "Room D" + String(selectedRoomId).padStart(2, "0");
+                var isNone = roomType === "none";
+                var roomLabel = isNone
+                    ? "No room (own accommodation)"
+                    : isSingle
+                        ? "Single room (self-book via Marriott)"
+                        : reservedRoom
+                            ? "Room " + reservedRoom
+                            : "Room D" + String(selectedRoomId).padStart(2, "0");
                 var roommate = g("roommateName");
                 var rmEmail = g("roommateEmail");
                 var matchPref = document.getElementById("matchPref").value;
@@ -1534,10 +1554,10 @@
                     phone: g("phone"),
                     registrationId: ticket,
                     selectedRoom: roomLabel,
-                    roomType: isSingle ? "Single room (self-book)" : "Double room (free, 2 beds)",
-                    roommateName: isSingle ? "" : roommate,
-                    roommateEmail: isSingle ? "" : rmEmail,
-                    matchPref: isSingle ? "" : matchPref,
+                    roomType: isNone ? "No room (own accommodation)" : isSingle ? "Single room (self-book)" : "Double room (free, 2 beds)",
+                    roommateName: (isSingle || isNone) ? "" : roommate,
+                    roommateEmail: (isSingle || isNone) ? "" : rmEmail,
+                    matchPref: (isSingle || isNone) ? "" : matchPref,
                     dietary: dietary,
                     notes: notes,
                     emergencyName: g("emergencyName"),
