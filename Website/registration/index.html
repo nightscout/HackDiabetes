@@ -977,6 +977,7 @@
                 line-height: 1.6;
             }
         </style>
+        <script src="config.js"></script>
     </head>
     <body>
         <header>
@@ -993,7 +994,14 @@
             <nav class="hdr-nav">
                 <a href="#about">About</a>
                 <a href="/sponsorship">Support this event</a>
-                <a href="/register" class="btn-nav">Join the Hack →</a>
+                <a id="navCta" href="/register" class="btn-nav">Join the Hack →</a>
+                <script>
+                    if (!REGISTRATION_OPEN) {
+                        var n = document.getElementById("navCta");
+                        n.href = "/interest";
+                        n.textContent = "Register interest →";
+                    }
+                </script>
             </nav>
         </header>
 
@@ -1530,6 +1538,7 @@
                     HackDiabetes 26 · Vancouver
                 </div>
                 <h2
+                    id="ctaHeading"
                     style="
                         font-size: clamp(28px, 3.5vw, 46px);
                         font-weight: 900;
@@ -1541,6 +1550,7 @@
                     Register &amp; book your room.
                 </h2>
                 <p
+                    id="ctaBody"
                     style="
                         font-size: 16px;
                         color: rgba(255, 255, 255, 0.5);
@@ -1551,26 +1561,29 @@
                     One form to register for HackDiabetes 26 and claim your
                     complimentary room at the JW Marriott Parq Vancouver.
                 </p>
-                <a
-                    href="/register"
-                    style="
-                        display: inline-flex;
-                        align-items: center;
-                        gap: 8px;
-                        padding: 16px 40px;
-                        background: var(--orange);
-                        color: #fff;
-                        text-decoration: none;
-                        border-radius: 8px;
-                        font-size: 16px;
-                        font-weight: 800;
-                        letter-spacing: 0.01em;
-                        box-shadow: 0 4px 20px rgba(240, 90, 62, 0.4);
-                        transition: background 0.15s;
-                    "
-                >
-                    Register now →
-                </a>
+                <script>
+                    if (!REGISTRATION_OPEN) {
+                        document.getElementById("ctaHeading").textContent = "Interested in attending?";
+                        document.getElementById("ctaBody").textContent = "Registration isn’t open yet — but you can register your interest now and we’ll be in touch when spots become available.";
+                    }
+                </script>
+                <a id="indexCtaPrimary" href="/register"
+                    style="display:inline-flex;align-items:center;gap:8px;padding:16px 40px;background:var(--orange);color:#fff;text-decoration:none;border-radius:8px;font-size:16px;font-weight:800;letter-spacing:0.01em;box-shadow:0 4px 20px rgba(240,90,62,0.4);transition:background 0.15s;"
+                >Register now →</a>
+                <a id="indexCtaSecondary" href="/interest"
+                    style="display:inline-flex;align-items:center;gap:8px;padding:16px 40px;background:transparent;color:rgba(255,255,255,0.7);text-decoration:none;border-radius:8px;font-size:16px;font-weight:700;border:1.5px solid rgba(255,255,255,0.2);transition:border-color 0.15s,color 0.15s;"
+                >Register your interest →</a>
+                <script>
+                    if (REGISTRATION_OPEN) {
+                        document.getElementById("indexCtaSecondary").style.display = "none";
+                    } else {
+                        var p = document.getElementById("indexCtaPrimary");
+                        p.href = "/interest";
+                        p.textContent = "Register your interest →";
+                        p.style.boxShadow = "";
+                        document.getElementById("indexCtaSecondary").style.display = "none";
+                    }
+                </script>
             </div>
         </section>
 
