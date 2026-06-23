@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <title>Room Status — HackDiabetes 26 Admin</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <title>Admin — HackDiabetes 26</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
     :root {
       --dark:    #0e1117;
@@ -20,9 +23,94 @@
     body {
       background: var(--dark2);
       color: #fff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       min-height: 100vh;
     }
+
+    /* ── PASSWORD OVERLAY ── */
+    #loginOverlay {
+      position: fixed;
+      inset: 0;
+      background: var(--dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .login-card {
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+    }
+    .login-card .brand {
+      font-size: 22px;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+    .login-card .brand span { color: var(--orange); }
+    .login-card .sub {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+    }
+    .login-card input[type="password"] {
+      width: 100%;
+      background: var(--dark2);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 15px;
+      padding: 12px 14px;
+      outline: none;
+      margin-bottom: 12px;
+      transition: border-color .15s;
+    }
+    .login-card input[type="password"]:focus {
+      border-color: var(--orange);
+    }
+    .login-card .login-btn {
+      width: 100%;
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 800;
+      padding: 12px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .login-card .login-btn:hover { background: #d44429; }
+    .login-card .login-btn:disabled { background: #555; cursor: not-allowed; }
+    .login-error {
+      font-size: 13px;
+      color: var(--orange);
+      font-weight: 600;
+      margin-top: 10px;
+      min-height: 20px;
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-6px); }
+      80% { transform: translateX(6px); }
+    }
+    .login-card.shaking { animation: shake .4s ease; }
+
+    /* ── MAIN UI ── */
+    #mainUI { display: none; }
 
     header {
       background: var(--dark);
@@ -36,10 +124,12 @@
     .header-left { display: flex; align-items: center; gap: 1rem; }
     .header-left img { height: 28px; opacity: .9; }
     .header-title { font-size: 14px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.6); }
-    .refresh-btn {
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .btn-sm {
       background: var(--dark3);
       border: 1px solid var(--border);
       color: #fff;
+      font-family: inherit;
       font-size: 12px;
       font-weight: 600;
       letter-spacing: .08em;
@@ -52,14 +142,43 @@
       gap: 6px;
       transition: background .15s;
     }
-    .refresh-btn:hover { background: #2a3347; }
+    .btn-sm:hover { background: #2a3347; }
     .refresh-icon { font-size: 14px; display: inline-block; }
     .refresh-icon.spinning { animation: spin .6s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .main { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+    /* ── TABS ── */
+    .tabs {
+      background: var(--dark);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      padding: 14px 20px;
+      cursor: pointer;
+      transition: color .15s, border-color .15s;
+    }
+    .tab-btn:hover { color: rgba(255,255,255,.7); }
+    .tab-btn.active { color: #fff; border-bottom-color: var(--orange); }
 
-    /* Summary bar */
+    /* ── MAIN ── */
+    .main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── SUMMARY BAR ── */
     .summary {
       display: flex;
       gap: 1.5rem;
@@ -72,23 +191,31 @@
       border-radius: 12px;
       padding: 1.25rem 1.75rem;
       flex: 1;
-      min-width: 140px;
+      min-width: 130px;
     }
     .stat-card .val { font-size: 36px; font-weight: 900; line-height: 1; letter-spacing: -.03em; }
     .stat-card .lbl { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
     .val.green { color: var(--green); }
     .val.orange { color: var(--orange); }
     .val.white { color: #fff; }
+    .val.yellow { color: #fbbf24; }
 
-    /* Room grid */
+    /* ── SECTION TITLE ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
     .section-title {
       font-size: 11px;
       font-weight: 700;
       letter-spacing: .12em;
       text-transform: uppercase;
       color: var(--muted);
-      margin-bottom: 1rem;
     }
+
+    /* ── ROOM GRID ── */
     .room-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -118,8 +245,9 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 11px;
     }
-    .bed.booked { background: var(--orange); border-color: var(--orange); }
-    .bed.free   { background: rgba(255,255,255,.06); }
+    .bed.confirmed { background: var(--orange); border-color: var(--orange); }
+    .bed.reserved  { background: #fbbf24; border-color: #f59e0b; }
+    .bed.free      { background: rgba(255,255,255,.06); }
 
     .room-status {
       font-size: 10px;
@@ -138,6 +266,168 @@
       text-align: right;
     }
 
+    /* ── INTERESTS TABLE ── */
+    .interests-table-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    table.interests {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    table.interests thead tr {
+      background: var(--dark);
+      border-bottom: 1px solid var(--border);
+    }
+    table.interests thead th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    table.interests tbody tr {
+      border-bottom: 1px solid var(--border);
+      background: var(--dark2);
+      transition: background .1s;
+    }
+    table.interests tbody tr:last-child { border-bottom: none; }
+    table.interests tbody tr:hover { background: var(--dark3); }
+    table.interests td {
+      padding: 12px 16px;
+      color: rgba(255,255,255,.85);
+      vertical-align: middle;
+    }
+    table.interests td.name-cell {
+      font-weight: 700;
+      color: #fff;
+    }
+    table.interests td.email-cell {
+      color: rgba(255,255,255,.5);
+      font-size: 12px;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .badge-orange  { background: rgba(240,90,62,.18);  color: #f97316; border: 1px solid rgba(240,90,62,.3); }
+    .badge-yellow  { background: rgba(251,191,36,.15); color: #fbbf24; border: 1px solid rgba(251,191,36,.3); }
+    .badge-green   { background: rgba(39,197,94,.15);  color: var(--green); border: 1px solid rgba(39,197,94,.3); }
+    .badge-grey    { background: rgba(255,255,255,.06); color: rgba(255,255,255,.4); border: 1px solid var(--border); }
+    .badge-invited { background: rgba(234,179,8,.18); color: #fbbf24; border: 1px solid rgba(234,179,8,.3); }
+    .badge-pending { background: rgba(255,255,255,.06); color: rgba(255,255,255,.4); border: 1px solid var(--border); }
+
+    .invite-btn {
+      background: var(--dark3);
+      border: 1px solid var(--border);
+      color: rgba(255,255,255,.8);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s, border-color .15s;
+    }
+    .invite-btn:hover:not(:disabled) { background: #2a3347; border-color: rgba(255,255,255,.2); }
+    .invite-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ── DETAIL DRAWER ── */
+    #detailDrawer {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 420px;
+      max-width: 96vw;
+      background: var(--dark);
+      border-left: 1px solid var(--border);
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform .25s cubic-bezier(.4,0,.2,1);
+      overflow: hidden;
+    }
+    #detailDrawer.open { transform: translateX(0); }
+    #drawerOverlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 499;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+    #drawerOverlay.open { opacity: 1; pointer-events: all; }
+    .drawer-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .drawer-header h3 { font-size: 15px; font-weight: 800; margin: 0; }
+    .drawer-close {
+      background: none; border: none; color: var(--muted);
+      font-size: 20px; cursor: pointer; line-height: 1; padding: 4px;
+      transition: color .15s;
+    }
+    .drawer-close:hover { color: #fff; }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 24px; }
+    .drawer-section {
+      margin-bottom: 24px;
+    }
+    .drawer-section-title {
+      font-size: 10px; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .drawer-field { margin-bottom: 12px; }
+    .drawer-field-label {
+      font-size: 11px; font-weight: 600; color: rgba(255,255,255,.4);
+      margin-bottom: 3px;
+    }
+    .drawer-field-value {
+      font-size: 13px; color: rgba(255,255,255,.9); line-height: 1.55;
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .drawer-field-value.empty { color: rgba(255,255,255,.25); font-style: italic; }
+    .drawer-divider {
+      height: 1px; background: var(--border); margin: 20px 0;
+    }
+    .drawer-actions {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-btn {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,.5);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .04em;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: color .15s, background .15s;
+    }
+    .view-btn:hover { color: #fff; background: rgba(255,255,255,.07); }
+    table.interests tbody tr.selected { background: var(--dark3); }
+
     .error-msg {
       background: rgba(240,90,62,.12);
       border: 1px solid rgba(240,90,62,.3);
@@ -148,49 +438,240 @@
       margin-bottom: 1.5rem;
       display: none;
     }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--muted);
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
 
-<header>
-  <div class="header-left">
-    <img src="images/hackdiabetes.png" alt="HackDiabetes" onerror="this.style.display='none'" />
-    <span class="header-title">Room Status · Admin</span>
+<!-- ── PASSWORD OVERLAY ── -->
+<div id="loginOverlay">
+  <div class="login-card" id="loginCard">
+    <div class="brand">Hack<span>Diabetes</span> 26</div>
+    <div class="sub">Admin · The Nightscout Foundation</div>
+    <input type="password" id="passwordInput" placeholder="Admin password" onkeydown="if(event.key==='Enter')doLogin()" />
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">Sign in</button>
+    <div class="login-error" id="loginError"></div>
   </div>
-  <button class="refresh-btn" onclick="load()">
-    <span class="refresh-icon" id="refreshIcon">↻</span> Refresh
-  </button>
-</header>
+</div>
 
-<div class="main">
-  <div class="error-msg" id="errorMsg">Failed to load data — check your connection and try again.</div>
+<!-- ── MAIN UI ── -->
+<div id="mainUI">
+  <header>
+    <div class="header-left">
+      <img src="images/hackdiabetes.png" alt="HackDiabetes" onerror="this.style.display='none'" />
+      <span class="header-title">Admin</span>
+    </div>
+    <div class="header-right">
+      <button class="btn-sm" onclick="refreshCurrentTab()">
+        <span class="refresh-icon" id="refreshIcon">↻</span> Refresh
+      </button>
+    </div>
+  </header>
 
-  <div class="summary">
-    <div class="stat-card"><div class="val green" id="statFree">—</div><div class="lbl">Beds available</div></div>
-    <div class="stat-card"><div class="val orange" id="statBooked">—</div><div class="lbl">Beds booked</div></div>
-    <div class="stat-card"><div class="val white" id="statRooms">—</div><div class="lbl">Rooms with space</div></div>
-    <div class="stat-card"><div class="val white" id="statFull">—</div><div class="lbl">Rooms full</div></div>
+  <div class="tabs">
+    <button class="tab-btn active" id="tabBtnRooms" onclick="switchTab('rooms')">Rooms</button>
+    <button class="tab-btn" id="tabBtnInterests" onclick="switchTab('interests')">Interest registrations</button>
+    <button class="tab-btn" id="tabBtnRegistrations" onclick="switchTab('registrations')">Registrations</button>
   </div>
 
-  <div class="section-title">All rooms</div>
-  <div class="room-grid" id="roomGrid"></div>
-  <div class="last-updated" id="lastUpdated"></div>
+  <div class="main">
+    <div class="error-msg" id="errorMsg">Failed to load data — check your connection and try again.</div>
+
+    <!-- ── ROOMS TAB ── -->
+    <div class="tab-panel active" id="tabRooms">
+      <div class="summary">
+        <div class="stat-card"><div class="val green" id="statFree">—</div><div class="lbl">Beds available</div></div>
+        <div class="stat-card"><div class="val orange" id="statConfirmed">—</div><div class="lbl">Confirmed</div></div>
+        <div class="stat-card"><div class="val yellow" id="statReserved">—</div><div class="lbl">Reserved</div></div>
+        <div class="stat-card"><div class="val white" id="statFull">—</div><div class="lbl">Rooms full</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap">
+        <div class="section-title">All rooms</div>
+        <div style="display:flex;gap:1.25rem;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)"><div style="width:12px;height:12px;border-radius:3px;background:var(--orange)"></div>Confirmed</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)"><div style="width:12px;height:12px;border-radius:3px;background:#fbbf24"></div>Reserved</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)"><div style="width:12px;height:12px;border-radius:3px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12)"></div>Available</div>
+        </div>
+      </div>
+      <div class="room-grid" id="roomGrid"></div>
+      <div class="last-updated" id="lastUpdated"></div>
+    </div>
+
+    <!-- ── REGISTRATIONS TAB ── -->
+    <div class="tab-panel" id="tabRegistrations">
+      <div class="summary">
+        <div class="stat-card"><div class="val white" id="rStatTotal">—</div><div class="lbl">Total registered</div></div>
+        <div class="stat-card"><div class="val green" id="rStatConfirmed">—</div><div class="lbl">Confirmed</div></div>
+        <div class="stat-card"><div class="val yellow" id="rStatReserved">—</div><div class="lbl">Reserved (pending)</div></div>
+        <div class="stat-card"><div class="val orange" id="rStatScholarship">—</div><div class="lbl">Scholarship requests</div></div>
+      </div>
+      <div class="section-header">
+        <div class="section-title">All registrations</div>
+      </div>
+      <div class="interests-table-wrap">
+        <table class="interests" id="regsTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Reg ID</th>
+              <th>Room</th>
+              <th>Roommate</th>
+              <th>Dietary</th>
+              <th>T-Shirt</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="regsTbody">
+            <tr><td colspan="8" class="empty-state">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="last-updated" id="regsLastUpdated"></div>
+    </div>
+
+    <!-- ── INTERESTS TAB ── -->
+    <div class="tab-panel" id="tabInterests">
+      <div class="summary">
+        <div class="stat-card"><div class="val white" id="iStatTotal">—</div><div class="lbl">Total submissions</div></div>
+        <div class="stat-card"><div class="val yellow" id="iStatPending">—</div><div class="lbl">Pending</div></div>
+        <div class="stat-card"><div class="val green" id="iStatInvited">—</div><div class="lbl">Invited</div></div>
+      </div>
+
+      <div class="section-header">
+        <div class="section-title">Interest registrations</div>
+      </div>
+
+      <div class="interests-table-wrap">
+        <table class="interests" id="interestsTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Submitted</th>
+              <th>Scholarship</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="interestsTbody">
+            <tr><td colspan="6" class="empty-state">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail drawer -->
+<div id="drawerOverlay" onclick="closeDrawer()"></div>
+<div id="detailDrawer">
+  <div class="drawer-header">
+    <h3 id="drawerName">—</h3>
+    <button class="drawer-close" onclick="closeDrawer()">×</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-actions" id="drawerActions"></div>
 </div>
 
 <script>
-  var AVAILABILITY_URL = "https://script.google.com/macros/s/AKfycbyXAjvcGX2SrJihyh8V1tDI-6fimch-G55WfzvDbvE7PHcX3110khGK6ORJDDZ_aVsfCA/exec";
+  var AVAILABILITY_URL = "https://script.google.com/macros/s/AKfycbx0wNCuc_XTkvv5F0SWC-FXnCrIxK7kK0ipAvtu2Y-D4Y_CINViihe2oxZWoxkqJhxXxg/exec";
   var BEDS = 2;
+  var currentTab = 'rooms';
+  var adminToken = null;
 
-  function load() {
+  // ── Auth ──────────────────────────────────────────────────────────────────
+  function init() {
+    var stored = sessionStorage.getItem('adminToken');
+    if (stored) {
+      adminToken = stored;
+      showMainUI();
+    }
+    // else overlay stays visible
+  }
+
+  function doLogin() {
+    var pw = document.getElementById('passwordInput').value;
+    if (!pw) return;
+    var btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.textContent = 'Signing in…';
+    document.getElementById('loginError').textContent = '';
+
+    fetch(AVAILABILITY_URL + '?action=adminLogin&password=' + encodeURIComponent(pw))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        btn.disabled = false;
+        btn.textContent = 'Sign in';
+        if (data.ok && data.adminToken) {
+          adminToken = data.adminToken;
+          sessionStorage.setItem('adminToken', adminToken);
+          document.getElementById('loginOverlay').style.display = 'none';
+          showMainUI();
+        } else {
+          var card = document.getElementById('loginCard');
+          card.classList.remove('shaking');
+          void card.offsetWidth; // reflow
+          card.classList.add('shaking');
+          document.getElementById('loginError').textContent = 'Incorrect password.';
+        }
+      })
+      .catch(function() {
+        btn.disabled = false;
+        btn.textContent = 'Sign in';
+        document.getElementById('loginError').textContent = 'Network error — try again.';
+      });
+  }
+
+  function handleUnauthorized() {
+    sessionStorage.removeItem('adminToken');
+    adminToken = null;
+    location.reload();
+  }
+
+  function showMainUI() {
+    document.getElementById('mainUI').style.display = 'block';
+    loadRooms();
+  }
+
+  // ── Tabs ──────────────────────────────────────────────────────────────────
+  function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('tabBtnRooms').classList.toggle('active', tab === 'rooms');
+    document.getElementById('tabBtnInterests').classList.toggle('active', tab === 'interests');
+    document.getElementById('tabBtnRegistrations').classList.toggle('active', tab === 'registrations');
+    document.getElementById('tabRooms').classList.toggle('active', tab === 'rooms');
+    document.getElementById('tabInterests').classList.toggle('active', tab === 'interests');
+    document.getElementById('tabRegistrations').classList.toggle('active', tab === 'registrations');
+    if (tab === 'rooms') loadRooms();
+    else if (tab === 'interests') loadInterests();
+    else loadRegistrations();
+  }
+
+  function refreshCurrentTab() {
+    if (currentTab === 'rooms') loadRooms();
+    else if (currentTab === 'interests') loadInterests();
+    else loadRegistrations();
+  }
+
+  // ── Rooms ─────────────────────────────────────────────────────────────────
+  function loadRooms() {
     var icon = document.getElementById('refreshIcon');
     icon.classList.add('spinning');
     document.getElementById('errorMsg').style.display = 'none';
 
-    fetch(AVAILABILITY_URL)
+    fetch(AVAILABILITY_URL + '?action=getRegistrations&adminToken=' + encodeURIComponent(adminToken || ''))
       .then(function(r) { return r.json(); })
       .then(function(data) {
         icon.classList.remove('spinning');
-        render(data);
+        if (data.error === 'unauthorized') { handleUnauthorized(); return; }
+        renderRooms(data.rows || []);
         document.getElementById('lastUpdated').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
       })
       .catch(function() {
@@ -199,44 +680,421 @@
       });
   }
 
-  function render(data) {
-    var totalBooked = 0, totalFree = 0, roomsFull = 0, roomsWithSpace = 0;
+  function renderRooms(rows) {
+    // Build per-room counts: { 'D01': { confirmed: 1, reserved: 0 }, ... }
+    var rooms = {};
+    for (var i = 1; i <= 15; i++) {
+      rooms['D' + String(i).padStart(2, '0')] = { confirmed: 0, reserved: 0, occupants: [] };
+    }
+    rows.forEach(function(row) {
+      function get(k) { return row[k] || row[k.toLowerCase()] || ''; }
+      var raw = get('Selected Room') || get('selected room') || '';
+      var m = raw.match(/D?0*(\d{1,2})/i);
+      if (!m) return;
+      var key = 'D' + String(parseInt(m[1])).padStart(2, '0');
+      if (!rooms[key]) return;
+      var status = (get('Status') || get('status') || '').toLowerCase();
+      var name = get('Name') || get('name') || '—';
+      if (status === 'confirmed') {
+        rooms[key].confirmed = Math.min(rooms[key].confirmed + 1, BEDS);
+        rooms[key].occupants.push({ name: name, status: 'confirmed' });
+      } else if (status === 'reserved') {
+        rooms[key].reserved = Math.min(rooms[key].reserved + 1, BEDS);
+        rooms[key].occupants.push({ name: name, status: 'reserved' });
+      }
+    });
+
+    var totalConfirmed = 0, totalReserved = 0, totalFree = 0, roomsFull = 0;
     var grid = document.getElementById('roomGrid');
     grid.innerHTML = '';
 
-    var keys = Object.keys(data).sort();
-    keys.forEach(function(key) {
-      var booked = data[key];
-      var free = BEDS - booked;
-      totalBooked += booked;
-      totalFree += free;
-      if (booked >= BEDS) roomsFull++;
-      else roomsWithSpace++;
+    Object.keys(rooms).sort().forEach(function(key) {
+      var c = rooms[key].confirmed;
+      var r = rooms[key].reserved;
+      var occupied = Math.min(c + r, BEDS);
+      var free = BEDS - occupied;
+      totalConfirmed += c;
+      totalReserved  += r;
+      totalFree      += free;
+      if (occupied >= BEDS) roomsFull++;
 
-      var cls = booked >= BEDS ? 'full' : booked > 0 ? 'half' : 'empty';
-      var statusText = booked >= BEDS ? 'Full' : booked === 1 ? '1 bed left' : '2 beds free';
+      var cls = occupied >= BEDS ? 'full' : occupied > 0 ? 'half' : 'empty';
+      var statusText = free === 0 ? 'Full' : free === 1 ? '1 bed left' : '2 beds free';
 
+      // Build beds: confirmed first (orange), then reserved (yellow), then free
+      var occupants = rooms[key].occupants || [];
       var beds = '';
       for (var i = 0; i < BEDS; i++) {
-        beds += '<div class="bed ' + (i < booked ? 'booked' : 'free') + '"></div>';
+        var occ = occupants[i];
+        if (i < c) {
+          var tip = occ ? occ.name + ' (confirmed)' : 'Confirmed';
+          beds += '<div class="bed confirmed" title="' + tip + '"></div>';
+        } else if (i < c + r) {
+          var occ2 = occupants[i];
+          var tip2 = occ2 ? occ2.name + ' (reserved)' : 'Reserved';
+          beds += '<div class="bed reserved" title="' + tip2 + '"></div>';
+        } else {
+          beds += '<div class="bed free" title="Available"></div>';
+        }
       }
 
-      grid.innerHTML += '<div class="room-tile ' + cls + '">' +
-        '<div class="room-id">' + key + '</div>' +
-        '<div class="bed-row">' + beds + '</div>' +
-        '<div class="room-status">' + statusText + '</div>' +
-        '</div>';
+      var nameLines = occupants.map(function(o) {
+        var dot = o.status === 'confirmed'
+          ? '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--orange);margin-right:4px;flex-shrink:0"></span>'
+          : '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#fbbf24;margin-right:4px;flex-shrink:0"></span>';
+        return '<div style="display:flex;align-items:center;font-size:10px;line-height:1.3;color:rgba(255,255,255,.75);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%">' + dot + o.name + '</div>';
+      }).join('');
+
+      grid.innerHTML += '<div class="room-tile ' + cls + '">'
+        + '<div class="room-id">' + key + '</div>'
+        + '<div class="bed-row">' + beds + '</div>'
+        + (nameLines ? '<div style="margin-top:5px;min-height:0">' + nameLines + '</div>' : '')
+        + '<div class="room-status">' + statusText + '</div>'
+        + '</div>';
     });
 
-    document.getElementById('statFree').textContent   = totalFree;
-    document.getElementById('statBooked').textContent = totalBooked;
-    document.getElementById('statRooms').textContent  = roomsWithSpace;
-    document.getElementById('statFull').textContent   = roomsFull;
+    document.getElementById('statFree').textContent      = totalFree;
+    document.getElementById('statConfirmed').textContent = totalConfirmed;
+    document.getElementById('statReserved').textContent  = totalReserved;
+    document.getElementById('statFull').textContent      = roomsFull;
   }
 
-  load();
-  // Auto-refresh every 60 seconds
-  setInterval(load, 60000);
+  // ── Interests ─────────────────────────────────────────────────────────────
+  function loadInterests() {
+    var icon = document.getElementById('refreshIcon');
+    icon.classList.add('spinning');
+    document.getElementById('errorMsg').style.display = 'none';
+    document.getElementById('interestsTbody').innerHTML = '<tr><td colspan="6" class="empty-state">Loading…</td></tr>';
+
+    fetch(AVAILABILITY_URL + '?action=getInterests&adminToken=' + encodeURIComponent(adminToken || ''))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        icon.classList.remove('spinning');
+        if (data.error === 'unauthorized') { handleUnauthorized(); return; }
+        renderInterests(data.rows || []);
+      })
+      .catch(function() {
+        icon.classList.remove('spinning');
+        document.getElementById('errorMsg').style.display = 'block';
+        document.getElementById('interestsTbody').innerHTML = '<tr><td colspan="6" class="empty-state">Failed to load.</td></tr>';
+      });
+  }
+
+  function scholarshipBadge(val) {
+    var v = (val || '').toLowerCase();
+    if (v.indexOf('cannot') !== -1 || v.indexOf('without') !== -1) {
+      return '<span class="badge badge-orange">Cannot attend without</span>';
+    }
+    if (v.indexOf('some') !== -1 || v.indexOf('assistance') !== -1 || v.indexOf('partial') !== -1) {
+      return '<span class="badge badge-yellow">Some assistance</span>';
+    }
+    if (v.indexOf('no') !== -1 || v.indexOf('self') !== -1 || v === '' || v === 'no assistance needed') {
+      return '<span class="badge badge-green">No assistance</span>';
+    }
+    if (!val || val.trim() === '') return '<span class="badge badge-grey">—</span>';
+    return '<span class="badge badge-grey">' + escHtml(val) + '</span>';
+  }
+
+  function statusBadge(val) {
+    var v = (val || '').toLowerCase();
+    if (v.indexOf('invited') !== -1) return '<span class="badge badge-invited">Invited</span>';
+    return '<span class="badge badge-pending">Pending</span>';
+  }
+
+  function escHtml(s) {
+    return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function formatDate(ts) {
+    if (!ts) return '—';
+    try {
+      var d = new Date(ts);
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch(e) { return ts; }
+  }
+
+  var interestRows = []; // kept for drawer lookups
+
+  function renderInterests(rows) {
+    interestRows = rows;
+    var total = rows.length;
+    var pending = 0, invited = 0;
+    rows.forEach(function(r) {
+      var s = (r['Status'] || r['status'] || '').toLowerCase();
+      if (s.indexOf('invited') !== -1) invited++;
+      else pending++;
+    });
+    document.getElementById('iStatTotal').textContent   = total;
+    document.getElementById('iStatPending').textContent = pending;
+    document.getElementById('iStatInvited').textContent = invited;
+
+    if (rows.length === 0) {
+      document.getElementById('interestsTbody').innerHTML = '<tr><td colspan="6" class="empty-state">No interest registrations yet.</td></tr>';
+      return;
+    }
+
+    var html = '';
+    rows.forEach(function(row, idx) {
+      function get(key) {
+        return row[key] || row[key.toLowerCase()] || row[key.charAt(0).toUpperCase() + key.slice(1)] || '';
+      }
+      var name       = get('Name') || '—';
+      var email      = get('Email') || '—';
+      var timestamp  = get('Timestamp') || '';
+      var scholarship = get('Scholarship') || '';
+      var status     = get('Status') || '';
+      var isInvited  = status.toLowerCase().indexOf('invited') !== -1;
+
+      html += '<tr id="irow-' + idx + '">'
+        + '<td class="name-cell" style="cursor:pointer" onclick="openDrawer(' + idx + ')">' + escHtml(name) + '</td>'
+        + '<td class="email-cell">' + escHtml(email) + '</td>'
+        + '<td>' + formatDate(timestamp) + '</td>'
+        + '<td>' + scholarshipBadge(scholarship) + '</td>'
+        + '<td id="istatus-' + idx + '">' + statusBadge(status) + '</td>'
+        + '<td style="white-space:nowrap">'
+        +   '<button class="view-btn" onclick="openDrawer(' + idx + ')">View</button>'
+        +   ' <button class="invite-btn" id="ibtn-' + idx + '" data-idx="' + idx + '"'
+        +     (isInvited ? ' disabled' : '')
+        +     ' onclick="sendInviteByIdx(this)">'
+        +     (isInvited ? 'Invited ✓' : 'Send invite →')
+        +   '</button>'
+        + '</td>'
+        + '</tr>';
+    });
+    document.getElementById('interestsTbody').innerHTML = html;
+  }
+
+  // ── Detail drawer ─────────────────────────────────────────────────────────
+  var currentDrawerIdx = null;
+
+  function openDrawer(idx) {
+    currentDrawerIdx = idx;
+    var row = interestRows[idx];
+    function get(key) {
+      return row[key] || row[key.toLowerCase()] || row[key.charAt(0).toUpperCase() + key.slice(1)] || '';
+    }
+    function field(label, val) {
+      var empty = !val || val.toString().trim() === '';
+      return '<div class="drawer-field">'
+        + '<div class="drawer-field-label">' + label + '</div>'
+        + '<div class="drawer-field-value' + (empty ? ' empty' : '') + '">' + (empty ? 'Not provided' : escHtml(val)) + '</div>'
+        + '</div>';
+    }
+
+    var name = get('Name') || '—';
+    var email = get('Email') || '—';
+    var status = get('Status') || '';
+    var isInvited = status.toLowerCase().indexOf('invited') !== -1;
+
+    document.getElementById('drawerName').textContent = name;
+
+    // Funding checkboxes — combine into readable list
+    var funding = [];
+    if (get('Funding Airfare')) funding.push('Airfare');
+    if (get('Funding Lodging')) funding.push('Lodging');
+    if (get('Funding Food'))    funding.push('Food');
+    var fundingOther = get('Funding Other');
+    if (fundingOther) funding.push(fundingOther === 'Yes' ? 'Other' : fundingOther);
+    var fundingStr = funding.join(', ');
+
+    var virtualTopics = get('Virtual Topics') || get('virtual topics') || '';
+    var virtualTopicsOther = get('Virtual Topics Other') || get('virtual topics other') || '';
+    if (virtualTopicsOther) virtualTopics += (virtualTopics ? ', ' : '') + virtualTopicsOther;
+
+    var html = '<div class="drawer-section">'
+      + '<div class="drawer-section-title">Contact</div>'
+      + field('Name', name)
+      + field('Email', email)
+      + field('Phone', get('Phone') || get('phone'))
+      + field('Submitted', formatDate(get('Timestamp') || get('timestamp')))
+      + '</div>'
+      + '<div class="drawer-divider"></div>'
+      + '<div class="drawer-section">'
+      + '<div class="drawer-section-title">About</div>'
+      + field('About themselves', get('About') || get('about'))
+      + field('How they\'d contribute', get('Contribution') || get('contribution'))
+      + '</div>'
+      + '<div class="drawer-divider"></div>'
+      + '<div class="drawer-section">'
+      + '<div class="drawer-section-title">Scholarship &amp; funding</div>'
+      + field('Scholarship need', get('Scholarship') || get('scholarship'))
+      + field('Funding requested', fundingStr)
+      + '</div>'
+      + '<div class="drawer-divider"></div>'
+      + '<div class="drawer-section">'
+      + '<div class="drawer-section-title">Virtual participation</div>'
+      + field('Virtual interest level', get('Virtual Interest') || get('virtual interest'))
+      + field('Virtual roundtable', get('Virtual Roundtable') || get('virtual roundtable'))
+      + field('Topics of interest', virtualTopics)
+      + '</div>';
+
+    document.getElementById('drawerBody').innerHTML = html;
+
+    // Actions footer — no inline args to avoid double-quote conflicts in HTML attributes
+    document.getElementById('drawerActions').innerHTML = '<button class="invite-btn" id="drawerInviteBtn"'
+      + (isInvited ? ' disabled' : '')
+      + ' onclick="sendInviteFromCurrentDrawer()">'
+      + (isInvited ? 'Invited ✓' : 'Send invite →')
+      + '</button>';
+
+    // Highlight selected row
+    document.querySelectorAll('#interestsTbody tr').forEach(function(tr) { tr.classList.remove('selected'); });
+    var tr = document.getElementById('irow-' + idx);
+    if (tr) tr.classList.add('selected');
+
+    document.getElementById('detailDrawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+  }
+
+  function closeDrawer() {
+    document.getElementById('detailDrawer').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
+    document.querySelectorAll('#interestsTbody tr').forEach(function(tr) { tr.classList.remove('selected'); });
+    currentDrawerIdx = null;
+  }
+
+  function sendInviteFromCurrentDrawer() {
+    if (currentDrawerIdx === null) return;
+    var idx = currentDrawerIdx;
+    var row = interestRows[idx];
+    if (!row) return;
+    function get(k) { return row[k] || row[k.toLowerCase()] || row[k.charAt(0).toUpperCase() + k.slice(1)] || ''; }
+    var email = get('Email') || '';
+    var name  = get('Name')  || '';
+    sendInvite(idx, email, name);
+    setTimeout(function() {
+      var tableBtn  = document.getElementById('ibtn-' + idx);
+      var drawerBtn = document.getElementById('drawerInviteBtn');
+      if (tableBtn && drawerBtn) {
+        drawerBtn.textContent = tableBtn.textContent;
+        drawerBtn.disabled    = tableBtn.disabled;
+      }
+    }, 100);
+  }
+
+  function sendInviteByIdx(btn) {
+    var idx = parseInt(btn.getAttribute('data-idx'), 10);
+    var row = interestRows[idx];
+    if (!row) return;
+    function get(k) { return row[k] || row[k.toLowerCase()] || row[k.charAt(0).toUpperCase() + k.slice(1)] || ''; }
+    sendInvite(idx, get('Email'), get('Name'));
+  }
+
+  function sendInvite(idx, email, name) {
+    if (!confirm('Send acceptance email to ' + name + '?')) return;
+    var btn = document.getElementById('ibtn-' + idx);
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    fetch(AVAILABILITY_URL + '?action=sendInvite&adminToken=' + encodeURIComponent(adminToken || '') + '&email=' + encodeURIComponent(email))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error === 'unauthorized') { handleUnauthorized(); return; }
+        if (data.error === 'already_invited') {
+          btn.textContent = 'Already invited';
+          document.getElementById('istatus-' + idx).innerHTML = statusBadge('Invited');
+          return;
+        }
+        if (data.ok) {
+          btn.textContent = 'Invited ✓';
+          document.getElementById('istatus-' + idx).innerHTML = statusBadge('Invited');
+        } else {
+          btn.disabled = false;
+          btn.textContent = 'Send invite →';
+          alert('Error: ' + (data.error || 'unknown'));
+        }
+      })
+      .catch(function() {
+        btn.disabled = false;
+        btn.textContent = 'Send invite →';
+        alert('Network error — please try again.');
+      });
+  }
+
+  // ── Registrations ─────────────────────────────────────────────────────────
+  function loadRegistrations() {
+    var icon = document.getElementById('refreshIcon');
+    icon.classList.add('spinning');
+    document.getElementById('errorMsg').style.display = 'none';
+    document.getElementById('regsTbody').innerHTML = '<tr><td colspan="8" class="empty-state">Loading…</td></tr>';
+
+    fetch(AVAILABILITY_URL + '?action=getRegistrations&adminToken=' + encodeURIComponent(adminToken || ''))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        icon.classList.remove('spinning');
+        if (data.error === 'unauthorized') { handleUnauthorized(); return; }
+        renderRegistrations(data.rows || []);
+        document.getElementById('regsLastUpdated').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+      })
+      .catch(function() {
+        icon.classList.remove('spinning');
+        document.getElementById('errorMsg').style.display = 'block';
+        document.getElementById('regsTbody').innerHTML = '<tr><td colspan="8" class="empty-state">Failed to load.</td></tr>';
+      });
+  }
+
+  function regStatusBadge(val) {
+    var v = (val || '').toLowerCase();
+    if (v === 'confirmed') return '<span class="badge badge-green">Confirmed</span>';
+    if (v === 'reserved')  return '<span class="badge badge-yellow">Reserved</span>';
+    return '<span class="badge badge-grey">' + escHtml(val || '—') + '</span>';
+  }
+
+  function renderRegistrations(rows) {
+    var total = rows.length, confirmed = 0, reserved = 0, scholarship = 0;
+    rows.forEach(function(r) {
+      var s = (r['Status'] || r['status'] || '').toLowerCase();
+      if (s === 'confirmed') confirmed++;
+      if (s === 'reserved')  reserved++;
+      // Check dietary for scholarship indicators — not tracked here, count rows with no reg ID (reserved/no ID = scholarship candidate)
+    });
+    document.getElementById('rStatTotal').textContent     = total;
+    document.getElementById('rStatConfirmed').textContent = confirmed;
+    document.getElementById('rStatReserved').textContent  = reserved;
+    // scholarship stat: count rows where reg ID is blank (reserved nominees have no ID)
+    var noId = rows.filter(function(r) { return !(r['Registration ID'] || r['registration id'] || '').trim(); }).length;
+    document.getElementById('rStatScholarship').textContent = noId;
+
+    if (rows.length === 0) {
+      document.getElementById('regsTbody').innerHTML = '<tr><td colspan="8" class="empty-state">No registrations yet.</td></tr>';
+      return;
+    }
+
+    var html = '';
+    rows.forEach(function(row) {
+      function get(key) {
+        return row[key] || row[key.toLowerCase()] || row[key.charAt(0).toUpperCase() + key.slice(1).toLowerCase()] || '';
+      }
+      var name     = get('Name') || '—';
+      var email    = get('Email') || '—';
+      var regId    = get('Registration ID') || get('registration id') || '—';
+      var room     = get('Selected Room') || get('selected room') || '—';
+      var roommate = get('Roommate Name') || get('roommate name') || '—';
+      var dietary  = get('Dietary') || '—';
+      var tshirt   = get('T-Shirt Size') || get('t-shirt size') || '—';
+      var status   = get('Status') || '';
+
+      html += '<tr>'
+        + '<td class="name-cell">' + escHtml(name) + '</td>'
+        + '<td class="email-cell">' + escHtml(email) + '</td>'
+        + '<td style="font-family:monospace;font-size:12px;color:rgba(255,255,255,.6)">' + escHtml(regId) + '</td>'
+        + '<td><span style="font-weight:700;color:#fff">' + escHtml(room) + '</span></td>'
+        + '<td style="color:rgba(255,255,255,.6);font-size:12px">' + escHtml(roommate) + '</td>'
+        + '<td style="color:rgba(255,255,255,.6);font-size:12px">' + escHtml(dietary) + '</td>'
+        + '<td style="color:rgba(255,255,255,.6);font-size:12px">' + escHtml(tshirt) + '</td>'
+        + '<td>' + regStatusBadge(status) + '</td>'
+        + '</tr>';
+    });
+    document.getElementById('regsTbody').innerHTML = html;
+  }
+
+  // ── Boot ──────────────────────────────────────────────────────────────────
+  init();
+
+  // Auto-refresh rooms every 60 seconds when on that tab
+  setInterval(function() {
+    if (currentTab === 'rooms') loadRooms();
+  }, 60000);
 </script>
 </body>
 </html>

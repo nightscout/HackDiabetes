@@ -200,6 +200,14 @@
         </section>
 
         <div class="form-wrap">
+            <!-- Shown when INTEREST_OPEN = false -->
+            <div id="interestClosedBanner" style="display:none;padding:80px 24px;text-align:center;max-width:600px;margin:0 auto">
+                <div style="font-size:48px;margin-bottom:20px">🔒</div>
+                <h2 style="color:#fff;font-size:32px;font-weight:800;margin:0 0 16px;letter-spacing:-0.02em">Interest registrations<br>aren't open yet.</h2>
+                <p style="color:rgba(255,255,255,0.5);font-size:16px;line-height:1.7;margin:0 0 36px">We'll be opening interest registrations for HackDiabetes 26 soon. Check back here or follow us for updates.</p>
+                <a href="/" style="display:inline-block;background:#f05a3e;color:#fff;font-weight:700;font-size:15px;padding:14px 32px;border-radius:8px;text-decoration:none">Back to home →</a>
+            </div>
+
             <!-- Shown when REGISTRATION_OPEN = true -->
             <div id="regOpenBanner" style="display:none;background:#0e1117;border-radius:16px;padding:56px 40px;text-align:center;max-width:640px;margin:0 auto 40px">
                 <div style="font-size:40px;margin-bottom:16px">🎉</div>
@@ -387,12 +395,22 @@
 
         <script>
             var AVAILABILITY_URL =
-                "https://script.google.com/macros/s/AKfycbyZpPt2lbhyiLDc2dHoACFQMgKKwe9IhklLfcXga4ULybzMzRSFRCU4GS798fkHybI97g/exec";
+                "https://script.google.com/macros/s/AKfycbx0wNCuc_XTkvv5F0SWC-FXnCrIxK7kK0ipAvtu2Y-D4Y_CINViihe2oxZWoxkqJhxXxg/exec";
 
             var DRAFT_KEY = "hd26_interest_draft";
 
-            // REGISTRATION_OPEN from config.js — swap panels accordingly
-            if (REGISTRATION_OPEN) {
+            // ?preview=1 in the URL bypasses INTEREST_OPEN for testing
+            var previewMode = new URLSearchParams(window.location.search).get("preview") === "1";
+
+            // INTEREST_OPEN from config.js — default true if not defined (safe fallback)
+            var interestOpen = (typeof INTEREST_OPEN !== "undefined") ? INTEREST_OPEN : true;
+            var registrationOpen = (typeof REGISTRATION_OPEN !== "undefined") ? REGISTRATION_OPEN : false;
+
+            if (!interestOpen && !previewMode) {
+                document.getElementById("interestClosedBanner").style.display = "block";
+                document.getElementById("formCard").style.display = "none";
+            } else if (registrationOpen) {
+                // Registration already open — no need for interest form
                 document.getElementById("regOpenBanner").style.display = "block";
                 document.getElementById("formCard").style.display = "none";
             }

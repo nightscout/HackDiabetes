@@ -918,6 +918,11 @@
                 </div>
 
                 <div class="wizard-card" id="wizardCard">
+                    <!-- ── PREFILL BANNER ── -->
+                    <div id="prefillBanner" style="display:none;background:#fef9c3;border:1.5px solid #fde047;border-left:4px solid #eab308;border-radius:8px;padding:12px 16px;font-size:13px;color:#713f12;line-height:1.55;margin-bottom:1.5rem">
+                        Your details have been pre-filled from your interest registration. Please review and update anything that&#39;s changed.
+                    </div>
+
                     <!-- ── STEP 1: Personal details ── -->
                     <div class="step-panel active" id="panel1">
                         <div class="panel-head">
@@ -1721,7 +1726,7 @@
 
         <script>
             var AVAILABILITY_URL =
-                "https://script.google.com/macros/s/AKfycbyZpPt2lbhyiLDc2dHoACFQMgKKwe9IhklLfcXga4ULybzMzRSFRCU4GS798fkHybI97g/exec";
+                "https://script.google.com/macros/s/AKfycbx0wNCuc_XTkvv5F0SWC-FXnCrIxK7kK0ipAvtu2Y-D4Y_CINViihe2oxZWoxkqJhxXxg/exec";
 
             // REGISTRATION_OPEN is set in config.js (loaded before this script)
             if (!REGISTRATION_OPEN) {
@@ -1738,6 +1743,31 @@
             // ── Session token + proof-of-work ─────────────────────────────────────
             // Page load: get a challenge, solve it silently, redeem for an active token.
             var sessionToken = null;
+
+            // ── Prefill from interest registration (?ref=UUID) ────────────────
+            (function() {
+                var params = new URLSearchParams(window.location.search);
+                var ref = params.get('ref');
+                if (!ref) return;
+                fetch(AVAILABILITY_URL + '?action=getPrefill&ref=' + encodeURIComponent(ref))
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (!data.ok) return;
+                        if (data.firstName) document.getElementById('firstName').value = data.firstName;
+                        if (data.lastName)  document.getElementById('lastName').value  = data.lastName;
+                        if (data.email)     document.getElementById('email').value     = data.email;
+                        if (data.phone)     document.getElementById('phone').value     = data.phone;
+                        if (data.scholarship) {
+                            var radio = document.querySelector('input[name="scholarship"][value="' + data.scholarship + '"]');
+                            if (radio) {
+                                radio.checked = true;
+                                if (typeof toggleScholarship === 'function') toggleScholarship(radio);
+                            }
+                        }
+                        document.getElementById('prefillBanner').style.display = 'block';
+                    })
+                    .catch(function() {});
+            })();
 
             function solvePoW(nonce, difficulty) {
                 return new Promise(function (resolve) {
