@@ -789,6 +789,7 @@
             footer a:hover {
                 color: var(--orange);
             }
+            @keyframes spin { to { transform: rotate(360deg); } }
         </style>
         <script src="config.js"></script>
     </head>
@@ -923,10 +924,16 @@
                     </script>
                 </div>
 
-                <div class="wizard-card" id="wizardCard">
-                    <!-- ── PREFILL BANNER ── -->
-                    <div id="prefillBanner" style="display:none;background:#fef9c3;border:1.5px solid #fde047;border-left:4px solid #eab308;border-radius:8px;padding:12px 16px;font-size:13px;color:#713f12;line-height:1.55;margin-bottom:1.5rem">
-                        Your details have been pre-filled from your interest registration. Please review and update anything that&#39;s changed.
+                <!-- ── Prefill loading state ── -->
+                <div id="prefillLoading" style="display:none;padding:80px 24px;text-align:center;">
+                    <div style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.1);border-top-color:#f05a3e;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 24px"></div>
+                    <p style="color:rgba(255,255,255,0.6);font-size:16px;font-weight:500">Loading your application details…</p>
+                </div>
+
+                <div class="wizard-card" id="wizardCard" style="display:none;position:relative">
+                    <div id="stepLoading" style="display:none;position:absolute;inset:0;background:rgba(255,255,255,0.85);border-radius:inherit;z-index:10;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+                        <div style="width:36px;height:36px;border:3px solid rgba(0,0,0,0.1);border-top-color:#f05a3e;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+                        <p id="stepLoadingMsg" style="color:#374151;font-size:15px;font-weight:500">Loading…</p>
                     </div>
 
                     <!-- ── STEP 1: Personal details ── -->
@@ -976,7 +983,6 @@
                                     autocomplete="tel"
                                 />
                             </div>
-                            <input type="hidden" id="ticketId" />
                         </div>
 
                         <div class="sdiv"><span>Additional info</span></div>
@@ -1213,14 +1219,20 @@
                                                 id="roommateEmail"
                                                 placeholder="their@email.com"
                                                 onblur="checkRoommateEmail()"
+                                                oninput="debouncedRoommateCheck()"
                                             />
-                                            <div
-                                                id="roommateCheckResult"
-                                                style="
-                                                    display: none;
-                                                    margin-top: 8px;
-                                                "
-                                            ></div>
+                                        </div>
+                                        <div
+                                            id="roommateCheckResult"
+                                            style="display:none;grid-column:1/-1"
+                                        ></div>
+                                        <div id="nomineeNotice" style="display:none;grid-column:1/-1;background:#f0f9ff;border:1.5px solid #bae6fd;border-left:4px solid #0284c7;border-radius:10px;padding:14px 16px;font-size:13px;color:#0c4a6e;line-height:1.6">
+                                            <strong style="display:block;margin-bottom:6px;font-size:13px;color:#0369a1">📋 Before you nominate a roommate</strong>
+                                            <ul style="padding-left:18px;margin:0;display:flex;flex-direction:column;gap:5px">
+                                                <li><strong>Email must match exactly</strong> — the email address you enter here must be the same one they use when they complete their own registration. If it doesn't match, they won't be paired with you.</li>
+                                                <li><strong>72-hour hold</strong> — we'll reserve a bed in your room for them. If they haven't registered within 72 hours, the bed will be released and you may be matched with someone else.</li>
+                                                <li><strong>They need an invite</strong> — make sure they've registered their interest and received an invite link before you nominate them.</li>
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>
@@ -1343,6 +1355,7 @@
                             </button>
                             <button
                                 class="btn btn-primary btn-arrow"
+                                id="step2Btn"
                                 onclick="goTo(3)"
                             >
                                 Review my registration
@@ -1378,10 +1391,6 @@
                             </div>
                             <div class="review-row">
                                 <span>Phone</span><span id="rv-phone">—</span>
-                            </div>
-                            <div class="review-row">
-                                <span>Ticket ID</span
-                                ><span id="rv-ticket">—</span>
                             </div>
                             <div
                                 class="review-row"
@@ -1478,10 +1487,27 @@
                             <button
                                 class="btn btn-submit"
                                 id="submitBtn"
-                                onclick="submitForm()"
+                                onclick="confirmAndSubmit()"
                             >
                                 Submit registration →
                             </button>
+                        </div>
+
+                        <!-- Roommate nomination confirmation modal -->
+                        <div id="nomineeConfirmOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;display:none;align-items:center;justify-content:center;padding:24px">
+                            <div style="background:#fff;border-radius:16px;padding:36px 32px;max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+                                <h3 style="font-size:20px;font-weight:800;color:#111827;margin:0 0 8px">Confirm roommate nomination</h3>
+                                <p style="color:#6b7280;font-size:14px;line-height:1.6;margin:0 0 20px">You're nominating <strong id="confirmNomineeName" style="color:#111827"></strong> as your roommate. Before you confirm, please check:</p>
+                                <ul style="color:#374151;font-size:14px;line-height:1.7;padding-left:20px;margin:0 0 20px;display:flex;flex-direction:column;gap:8px">
+                                    <li><strong>Email address:</strong> they must register using <strong id="confirmNomineeEmail" style="color:#0284c7;font-family:monospace;font-size:13px"></strong> — if they use a different email they won't be paired with you.</li>
+                                    <li><strong>72-hour hold:</strong> we'll reserve a bed in your room for them. If they don't complete registration within 72 hours the bed will be released.</li>
+                                    <li><strong>They need their invite link:</strong> they must have received an invite email to complete registration.</li>
+                                </ul>
+                                <div style="display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap">
+                                    <button onclick="closeNomineeConfirm()" style="background:#f3f4f6;color:#374151;border:1.5px solid #d1d5db;border-radius:8px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Go back</button>
+                                    <button onclick="nomineeConfirmed()" style="background:#f05a3e;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Yes, I understand — submit →</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -1711,7 +1737,7 @@
 
         <script>
             var AVAILABILITY_URL =
-                "https://script.google.com/macros/s/AKfycbyv0ZPLmsUQkOjoU-zfbURMagBZ71RC8fgbyDNoYlANg2qvrfeXxdYoxKZRcs3HPPdFlw/exec";
+                "https://script.google.com/macros/s/AKfycbyHWxfCk9BZ8xiEMbXZSTOcB2BRt1QHU0c8uee6riQMX_f7n3vYi184qfodWL6UUPQh5Q/exec";
 
             var currentStep = 1;
             var roomType = "double";
@@ -1728,13 +1754,28 @@
                 var params = new URLSearchParams(window.location.search);
                 var ref = params.get('ref');
 
+                function showLoading() {
+                    document.getElementById('prefillLoading').style.display = 'block';
+                    document.getElementById('wizardCard').style.display = 'none';
+                    document.getElementById('inviteGate').style.display = 'none';
+                }
+
                 function showGate() {
+                    document.getElementById('prefillLoading').style.display = 'none';
                     document.getElementById('inviteGate').style.display = 'block';
                     document.getElementById('wizardCard').style.display = 'none';
                     document.querySelector('.step-track').style.display = 'none';
                 }
 
+                function showForm() {
+                    document.getElementById('prefillLoading').style.display = 'none';
+                    document.getElementById('inviteGate').style.display = 'none';
+                    document.getElementById('wizardCard').style.display = 'block';
+                }
+
                 if (!ref) { showGate(); return; }
+
+                showLoading();
 
                 fetch(AVAILABILITY_URL + '?action=getPrefill&ref=' + encodeURIComponent(ref))
                     .then(function(r) { return r.json(); })
@@ -1744,7 +1785,6 @@
                         if (data.lastName)  document.getElementById('lastName').value  = data.lastName;
                         if (data.email)     document.getElementById('email').value     = data.email;
                         if (data.phone)     document.getElementById('phone').value     = data.phone;
-                        if (data.ticketId)  document.getElementById('ticketId').value  = data.ticketId;
                         if (data.scholarship) {
                             var radio = document.querySelector('input[name="scholarship"][value="' + data.scholarship + '"]');
                             if (radio) {
@@ -1752,8 +1792,10 @@
                                 if (typeof toggleScholarship === 'function') toggleScholarship(radio);
                             }
                         }
-                        document.getElementById('prefillBanner').style.display = 'block';
-                        if (typeof updateStep1Btn === 'function') updateStep1Btn();
+                        showForm();
+                        setTimeout(function() {
+                            if (typeof updateStep1Btn === 'function') updateStep1Btn();
+                        }, 0);
                     })
                     .catch(function() { showGate(); });
             })();
@@ -1893,7 +1935,17 @@
             }
 
             // ── Reservation check ──
+            function showStepLoading(msg) {
+                var el = document.getElementById('stepLoading');
+                document.getElementById('stepLoadingMsg').textContent = msg || 'Loading…';
+                el.style.display = 'flex';
+            }
+            function hideStepLoading() {
+                document.getElementById('stepLoading').style.display = 'none';
+            }
+
             function checkReservation(email, callback) {
+                showStepLoading('Checking your details…');
                 fetch(
                     AVAILABILITY_URL +
                         "?action=checkReservation&email=" +
@@ -1930,9 +1982,11 @@
                                 "roomChoiceSection",
                             ).style.display = "";
                         }
+                        hideStepLoading();
                         callback();
                     })
                     .catch(function () {
+                        hideStepLoading();
                         reservedRoom = null;
                         callback();
                     });
@@ -2104,21 +2158,40 @@
             }
 
             var roommateFieldBlocked = false;
+            var roommateCheckTimer = null;
+            var roommateLastChecked = null;
+
+            function debouncedRoommateCheck() {
+                clearTimeout(roommateCheckTimer);
+                var email = document.getElementById("roommateEmail").value.trim();
+                var step2Btn = document.getElementById("step2Btn");
+                if (email === roommateLastChecked) return;
+                document.getElementById("roommateCheckResult").style.display = "none";
+                if (step2Btn) step2Btn.disabled = true;
+                // Only queue a check once the email looks complete
+                if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+                roommateCheckTimer = setTimeout(checkRoommateEmail, 1000);
+            }
 
             function checkRoommateEmail() {
+                var email = document.getElementById("roommateEmail").value.trim();
+                if (email && email === roommateLastChecked) return; // skip if unchanged
                 var email = document
                     .getElementById("roommateEmail")
                     .value.trim();
                 var el = document.getElementById("roommateCheckResult");
                 roommateFieldBlocked = false;
+                var step2Btn = document.getElementById("step2Btn");
                 if (!email || !email.includes("@")) {
                     el.style.display = "none";
+                    if (step2Btn) step2Btn.disabled = false;
                     return;
                 }
                 if (email.toLowerCase() === g("email").toLowerCase()) {
                     el.style.display = "";
                     el.innerHTML = '<span style="color:#f05a3e;font-size:13px;font-weight:600">You can\'t nominate yourself as a roommate.</span>';
                     roommateFieldBlocked = true;
+                    if (step2Btn) step2Btn.disabled = true;
                     return;
                 }
                 if (!sessionToken) {
@@ -2126,6 +2199,7 @@
                     return;
                 }
 
+                if (step2Btn) step2Btn.disabled = true;
                 el.style.display = "";
                 el.innerHTML =
                     '<span style="color:#6b7280;font-size:13px">Checking…</span>';
@@ -2141,11 +2215,15 @@
                         return r.json();
                     })
                     .then(function (data) {
+                        roommateLastChecked = email;
+                        var step2Btn = document.getElementById("step2Btn");
                         if (data.error) {
                             el.style.display = "none";
+                            if (step2Btn) step2Btn.disabled = false;
                             return;
                         }
                         if (data.registered) {
+                            if (step2Btn) step2Btn.disabled = false;
                             el.innerHTML =
                                 '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-left:4px solid #27c55e;border-radius:8px;padding:.9rem 1.1rem;font-size:13px;color:#166534">' +
                                 '<strong style="color:#15803d;display:block;margin-bottom:3px">✓ They\'re already registered</strong>' +
@@ -2153,6 +2231,7 @@
                                 "</div>";
                         } else if (data.alreadyClaimed) {
                             roommateFieldBlocked = true;
+                            if (step2Btn) step2Btn.disabled = true;
                             el.innerHTML =
                                 '<div style="background:#fef2f2;border:1.5px solid #fecaca;border-left:4px solid #ef4444;border-radius:8px;padding:.9rem 1.1rem;font-size:13px;color:#991b1b">' +
                                 '<strong style="color:#dc2626;display:block;margin-bottom:6px">This person is already paired up with someone else.</strong>' +
@@ -2161,16 +2240,26 @@
                                 '<button type="button" onclick="roommatePickAnother()" style="background:var(--orange);color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer">Pick someone else</button>' +
                                 '<button type="button" onclick="roommateAutoMatch()" style="background:#f3f4f6;color:#374151;border:1.5px solid #d1d5db;border-radius:6px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer">Match me with someone</button>' +
                                 "</div></div>";
-                        } else {
+                        } else if (data.invited) {
+                            if (step2Btn) step2Btn.disabled = false;
                             el.innerHTML =
                                 '<div style="background:#fff7ed;border:1.5px solid #fed7aa;border-left:4px solid var(--orange);border-radius:8px;padding:.9rem 1.1rem;font-size:13px;color:#92400e">' +
-                                '<strong style="color:var(--orange2);display:block;margin-bottom:3px">They haven\'t registered yet</strong>' +
-                                "You can still nominate them — we'll hold a bed and they'll need to register separately." +
+                                '<strong style="color:var(--orange2);display:block;margin-bottom:3px">They\'ve been invited but haven\'t registered yet</strong>' +
+                                "You can still nominate them — we'll hold a bed. They'll complete their registration using their invite link." +
+                                "</div>";
+                        } else {
+                            if (step2Btn) step2Btn.disabled = false;
+                            el.innerHTML =
+                                '<div style="background:#fff7ed;border:1.5px solid #fed7aa;border-left:4px solid var(--orange);border-radius:8px;padding:.9rem 1.1rem;font-size:13px;color:#92400e">' +
+                                '<strong style="color:var(--orange2);display:block;margin-bottom:3px">They haven\'t been invited yet</strong>' +
+                                "You can still nominate them as a preferred roommate — they'll need to register their interest and receive an invite before they can complete registration." +
                                 "</div>";
                         }
                     })
                     .catch(function () {
                         el.style.display = "none";
+                        var step2Btn = document.getElementById("step2Btn");
+                        if (step2Btn) step2Btn.disabled = false;
                     });
             }
 
@@ -2189,6 +2278,28 @@
                 roommateFieldBlocked = false;
             }
 
+            function confirmAndSubmit() {
+                var pref = document.getElementById("matchPref").value;
+                var hasNominee = pref === "nominate" && g("roommateEmail");
+                if (hasNominee) {
+                    document.getElementById("confirmNomineeName").textContent = g("roommateName") || g("roommateEmail");
+                    document.getElementById("confirmNomineeEmail").textContent = g("roommateEmail");
+                    var overlay = document.getElementById("nomineeConfirmOverlay");
+                    overlay.style.display = "flex";
+                } else {
+                    submitForm();
+                }
+            }
+
+            function closeNomineeConfirm() {
+                document.getElementById("nomineeConfirmOverlay").style.display = "none";
+            }
+
+            function nomineeConfirmed() {
+                closeNomineeConfirm();
+                submitForm();
+            }
+
             function updateRoommateFields() {
                 var pref = document.getElementById("matchPref").value;
                 var isNominate = pref === "nominate";
@@ -2197,8 +2308,19 @@
                     isNominate ? "" : "none";
                 document.getElementById("roommateEmailField").style.display =
                     isNominate ? "" : "none";
+                document.getElementById("nomineeNotice").style.display =
+                    isNominate ? "" : "none";
                 document.getElementById("roommateCheckResult").style.display =
                     "none";
+
+                var step2Btn = document.getElementById("step2Btn");
+                if (!isNominate) {
+                    if (step2Btn) step2Btn.disabled = false;
+                } else {
+                    // Always disable until check passes
+                    if (step2Btn) step2Btn.disabled = true;
+                    if (g("roommateEmail")) checkRoommateEmail();
+                }
             }
 
             // ── Review ──
@@ -2207,8 +2329,7 @@
                 document.getElementById("rv-name").textContent = name;
                 document.getElementById("rv-email").textContent = g("email");
                 document.getElementById("rv-phone").textContent = g("phone");
-                document.getElementById("rv-ticket").textContent =
-                    g("ticketId");
+
 
                 var dietary = g("dietary");
                 if (dietary) {
@@ -2308,7 +2429,6 @@
             function submitForm() {
                 var name = g("firstName") + " " + g("lastName");
                 var email = g("email");
-                var ticket = g("ticketId");
                 var isSingle = roomType === "single";
                 var isNone = roomType === "none";
                 var isGroupRate = isSingle && singleMode === "group";
@@ -2336,12 +2456,12 @@
                 var btn = document.getElementById("submitBtn");
                 btn.disabled = true;
                 btn.textContent = "Submitting…";
+                showStepLoading('Submitting your registration…');
 
                 var payload = {
                     name: name,
                     email: email,
                     phone: g("phone"),
-                    registrationId: ticket,
                     selectedRoom: roomLabel,
                     roomType: isNone
                         ? "No room (own accommodation)"
@@ -2371,6 +2491,7 @@
                         return r.json();
                     })
                     .then(function (data) {
+                        hideStepLoading();
                         if (data.status === "ok") {
                             if (isSingle && !isGroupRate) {
                                 window.open(
@@ -2417,6 +2538,7 @@
                         }
                     })
                     .catch(function () {
+                        hideStepLoading();
                         btn.disabled = false;
                         btn.textContent = "Submit registration →";
                         alert("Network error — please try again.");
