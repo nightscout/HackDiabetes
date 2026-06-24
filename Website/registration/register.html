@@ -991,7 +991,7 @@
                                 />
                             </div>
                             <div class="field">
-                                <label>T-shirt size</label>
+                                <label>T-shirt size <span class="req">*</span></label>
                                 <select id="tshirt">
                                     <option value="">— Select —</option>
                                     <option>XS</option>
@@ -1037,7 +1037,7 @@
 
                         <div id="step1Err" class="err">
                             Please fill in all required fields (first name, last
-                            name, email, phone, emergency contact name and phone).
+                            name, email, phone, emergency contact name and phone, t-shirt size).
                         </div>
 
                         <div class="btn-row">
@@ -1046,7 +1046,6 @@
                                 class="btn btn-primary btn-arrow"
                                 id="step1Btn"
                                 onclick="verifyAndContinue()"
-                                disabled
                             >
                                 Continue to room choice
                             </button>
@@ -1754,6 +1753,7 @@
                             }
                         }
                         document.getElementById('prefillBanner').style.display = 'block';
+                        if (typeof updateStep1Btn === 'function') updateStep1Btn();
                     })
                     .catch(function() { showGate(); });
             })();
@@ -1966,14 +1966,22 @@
             }
 
             // ── Validation ──
+            function step1Complete() {
+                return v("firstName") && v("lastName") && ve("email") && vp("phone") && v("emergencyName") && vp("emergencyPhone") && v("tshirt");
+            }
+
+            function updateStep1Btn() {
+                document.getElementById("step1Btn").disabled = !step1Complete();
+            }
+
+            ["firstName","lastName","email","phone","emergencyName","emergencyPhone","tshirt"].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.addEventListener("input", updateStep1Btn);
+                if (el) el.addEventListener("change", updateStep1Btn);
+            });
+
             function validateStep1() {
-                var ok =
-                    v("firstName") &&
-                    v("lastName") &&
-                    ve("email") &&
-                    vp("phone") &&
-                    v("emergencyName") &&
-                    vp("emergencyPhone");
+                var ok = step1Complete();
                 document
                     .getElementById("step1Err")
                     .classList.toggle("show", !ok);
