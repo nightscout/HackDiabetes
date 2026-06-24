@@ -581,7 +581,7 @@
 </div>
 
 <script>
-  var AVAILABILITY_URL = "https://script.google.com/macros/s/AKfycbx0wNCuc_XTkvv5F0SWC-FXnCrIxK7kK0ipAvtu2Y-D4Y_CINViihe2oxZWoxkqJhxXxg/exec";
+  var AVAILABILITY_URL = "https://script.google.com/macros/s/AKfycbyv0ZPLmsUQkOjoU-zfbURMagBZ71RC8fgbyDNoYlANg2qvrfeXxdYoxKZRcs3HPPdFlw/exec";
   var BEDS = 2;
   var currentTab = 'rooms';
   var adminToken = null;
@@ -928,6 +928,21 @@
       + field('Topics of interest', virtualTopics)
       + '</div>';
 
+    // Invite link section — only shown after invite sent
+    var prefillToken = get('prefill token') || get('Prefill Token') || '';
+    if (isInvited && prefillToken) {
+      var inviteUrl = 'https://hackdiabetes.io/register?ref=' + encodeURIComponent(prefillToken);
+      html += '<div class="drawer-divider"></div>'
+        + '<div class="drawer-section">'
+        + '<div class="drawer-section-title">Invite link</div>'
+        + '<div class="drawer-field-label" style="margin-bottom:6px">Share this if the invite email wasn\'t received</div>'
+        + '<div style="display:flex;gap:8px;align-items:center">'
+        + '<input id="inviteLinkInput" readonly value="' + inviteUrl.replace(/"/g, '&quot;') + '" style="flex:1;background:#0e1117;border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:8px 10px;color:rgba(255,255,255,.7);font-size:12px;font-family:monospace;min-width:0">'
+        + '<button onclick="copyInviteLink()" style="background:#1e2738;border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:6px;padding:8px 14px;font-size:13px;cursor:pointer;white-space:nowrap" id="copyLinkBtn">Copy</button>'
+        + '</div>'
+        + '</div>';
+    }
+
     document.getElementById('drawerBody').innerHTML = html;
 
     // Actions footer — no inline args to avoid double-quote conflicts in HTML attributes
@@ -944,6 +959,21 @@
 
     document.getElementById('detailDrawer').classList.add('open');
     document.getElementById('drawerOverlay').classList.add('open');
+  }
+
+  function copyInviteLink() {
+    var input = document.getElementById('inviteLinkInput');
+    var btn = document.getElementById('copyLinkBtn');
+    if (!input) return;
+    navigator.clipboard.writeText(input.value).then(function() {
+      btn.textContent = 'Copied ✓';
+      setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+    }).catch(function() {
+      input.select();
+      document.execCommand('copy');
+      btn.textContent = 'Copied ✓';
+      setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+    });
   }
 
   function closeDrawer() {

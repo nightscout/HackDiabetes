@@ -994,19 +994,10 @@
             <nav class="hdr-nav">
                 <a href="#about">About</a>
                 <a href="/sponsorship">Support this event</a>
-                <a id="navCta" href="/register" class="btn-nav">Join the Hack →</a>
+                <a id="navCta" href="/interest" class="btn-nav">Register interest →</a>
                 <script>
-                    var _ro = (typeof REGISTRATION_OPEN !== "undefined") ? REGISTRATION_OPEN : false;
                     var _io = (typeof INTEREST_OPEN !== "undefined") ? INTEREST_OPEN : true;
-                    if (_ro) {
-                        // leave default: href="/register"
-                    } else if (_io) {
-                        var n = document.getElementById("navCta");
-                        n.href = "/interest";
-                        n.textContent = "Register interest →";
-                    } else {
-                        document.getElementById("navCta").style.display = "none";
-                    }
+                    if (!_io) document.getElementById("navCta").style.display = "none";
                 </script>
             </nav>
         </header>
@@ -1564,41 +1555,23 @@
                         margin-bottom: 2.5rem;
                     "
                 >
-                    One form to register for HackDiabetes 26 and claim your
-                    complimentary room at the JW Marriott Parq Vancouver.
+                    Tell us about yourself and we'll be in touch when registration opens.
                 </p>
                 <script>
-                    var _ro2 = (typeof REGISTRATION_OPEN !== "undefined") ? REGISTRATION_OPEN : false;
                     var _io2 = (typeof INTEREST_OPEN !== "undefined") ? INTEREST_OPEN : true;
-                    if (_ro2) {
-                        // headings already correct
-                    } else if (_io2) {
-                        document.getElementById("ctaHeading").textContent = "Interested in attending?";
-                        document.getElementById("ctaBody").textContent = "Registration isn’t open yet — but you can register your interest now and we’ll be in touch when spots become available.";
-                    } else {
+                    if (!_io2) {
                         document.getElementById("ctaHeading").textContent = "Coming soon.";
                         document.getElementById("ctaBody").textContent = "HackDiabetes 26 registrations aren’t open yet. Check back here or follow us for updates on when interest registrations open.";
+                    } else {
+                        document.getElementById("ctaHeading").textContent = "Interested in attending?";
+                        document.getElementById("ctaBody").textContent = "Register your interest now and we’ll be in touch when spots become available.";
                     }
                 </script>
-                <a id="indexCtaPrimary" href="/register"
+                <a id="indexCtaPrimary" href="/interest"
                     style="display:inline-flex;align-items:center;gap:8px;padding:16px 40px;background:var(--orange);color:#fff;text-decoration:none;border-radius:8px;font-size:16px;font-weight:800;letter-spacing:0.01em;box-shadow:0 4px 20px rgba(240,90,62,0.4);transition:background 0.15s;"
-                >Register now →</a>
-                <a id="indexCtaSecondary" href="/interest"
-                    style="display:inline-flex;align-items:center;gap:8px;padding:16px 40px;background:transparent;color:rgba(255,255,255,0.7);text-decoration:none;border-radius:8px;font-size:16px;font-weight:700;border:1.5px solid rgba(255,255,255,0.2);transition:border-color 0.15s,color 0.15s;"
                 >Register your interest →</a>
                 <script>
-                    if (_ro2) {
-                        document.getElementById("indexCtaSecondary").style.display = "none";
-                    } else if (_io2) {
-                        var p = document.getElementById("indexCtaPrimary");
-                        p.href = "/interest";
-                        p.textContent = "Register your interest →";
-                        p.style.boxShadow = "";
-                        document.getElementById("indexCtaSecondary").style.display = "none";
-                    } else {
-                        document.getElementById("indexCtaPrimary").style.display = "none";
-                        document.getElementById("indexCtaSecondary").style.display = "none";
-                    }
+                    if (!_io2) document.getElementById("indexCtaPrimary").style.display = "none";
                 </script>
             </div>
         </section>
@@ -1616,7 +1589,7 @@
         <script>
             (function () {
                 var AVAILABILITY_URL =
-                    "https://script.google.com/macros/s/AKfycbx0wNCuc_XTkvv5F0SWC-FXnCrIxK7kK0ipAvtu2Y-D4Y_CINViihe2oxZWoxkqJhxXxg/exec";
+                    "https://script.google.com/macros/s/AKfycbyv0ZPLmsUQkOjoU-zfbURMagBZ71RC8fgbyDNoYlANg2qvrfeXxdYoxKZRcs3HPPdFlw/exec";
                 fetch(AVAILABILITY_URL)
                     .then(function (r) {
                         return r.json();

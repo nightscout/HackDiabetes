@@ -23,7 +23,7 @@
                 --bg:      #f3f4f6;
             }
 
-            body { font-family: 'Inter', sans-serif; background: var(--dark2); color: #111827; min-height: 100vh; }
+            body { font-family: 'Inter', sans-serif; background: var(--dark); color: #111827; min-height: 100vh; }
 
             /* ── Header ── */
             header {
@@ -201,20 +201,13 @@
 
         <div class="form-wrap">
             <!-- Shown when INTEREST_OPEN = false -->
-            <div id="interestClosedBanner" style="display:none;padding:80px 24px;text-align:center;max-width:600px;margin:0 auto">
+            <div id="interestClosedBanner" style="display:none;padding:56px 40px;margin-top:40px;text-align:center;background:var(--dark2);border-radius:16px;border:1px solid rgba(255,255,255,0.06);">
                 <div style="font-size:48px;margin-bottom:20px">🔒</div>
                 <h2 style="color:#fff;font-size:32px;font-weight:800;margin:0 0 16px;letter-spacing:-0.02em">Interest registrations<br>aren't open yet.</h2>
                 <p style="color:rgba(255,255,255,0.5);font-size:16px;line-height:1.7;margin:0 0 36px">We'll be opening interest registrations for HackDiabetes 26 soon. Check back here or follow us for updates.</p>
                 <a href="/" style="display:inline-block;background:#f05a3e;color:#fff;font-weight:700;font-size:15px;padding:14px 32px;border-radius:8px;text-decoration:none">Back to home →</a>
             </div>
 
-            <!-- Shown when REGISTRATION_OPEN = true -->
-            <div id="regOpenBanner" style="display:none;background:#0e1117;border-radius:16px;padding:56px 40px;text-align:center;max-width:640px;margin:0 auto 40px">
-                <div style="font-size:40px;margin-bottom:16px">🎉</div>
-                <h2 style="color:#fff;font-size:28px;font-weight:800;margin:0 0 12px">Registration is now open!</h2>
-                <p style="color:rgba(255,255,255,0.55);font-size:16px;line-height:1.6;margin:0 0 28px">You don't need to register your interest anymore — head straight to the registration form to claim your spot and book your room.</p>
-                <a href="/register" style="display:inline-block;background:#f05a3e;color:#fff;font-weight:700;font-size:15px;padding:14px 32px;border-radius:8px;text-decoration:none">Register now →</a>
-            </div>
 
             <div class="form-card" id="formCard">
 
@@ -395,7 +388,7 @@
 
         <script>
             var AVAILABILITY_URL =
-                "https://script.google.com/macros/s/AKfycbx0wNCuc_XTkvv5F0SWC-FXnCrIxK7kK0ipAvtu2Y-D4Y_CINViihe2oxZWoxkqJhxXxg/exec";
+                "https://script.google.com/macros/s/AKfycbyv0ZPLmsUQkOjoU-zfbURMagBZ71RC8fgbyDNoYlANg2qvrfeXxdYoxKZRcs3HPPdFlw/exec";
 
             var DRAFT_KEY = "hd26_interest_draft";
 
@@ -404,14 +397,8 @@
 
             // INTEREST_OPEN from config.js — default true if not defined (safe fallback)
             var interestOpen = (typeof INTEREST_OPEN !== "undefined") ? INTEREST_OPEN : true;
-            var registrationOpen = (typeof REGISTRATION_OPEN !== "undefined") ? REGISTRATION_OPEN : false;
-
             if (!interestOpen && !previewMode) {
                 document.getElementById("interestClosedBanner").style.display = "block";
-                document.getElementById("formCard").style.display = "none";
-            } else if (registrationOpen) {
-                // Registration already open — no need for interest form
-                document.getElementById("regOpenBanner").style.display = "block";
                 document.getElementById("formCard").style.display = "none";
             }
 

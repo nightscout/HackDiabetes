@@ -80,19 +80,10 @@
     <nav class="hdr-nav">
         <a href="/#about">About</a>
         <a href="https://www.nightscoutfoundation.org/new-products/p/direct-donation-apa26" target="_blank" rel="noopener" class="btn-nav" style="background:transparent;border:1.5px solid var(--orange);color:var(--orange) !important;margin-left:0">♥ Donate</a>
-        <a id="navCta" href="/register" class="btn-nav">Join the Hack →</a>
+        <a id="navCta" href="/interest" class="btn-nav">Register interest →</a>
         <script>
-            var _ro = (typeof REGISTRATION_OPEN !== 'undefined') ? REGISTRATION_OPEN : false;
             var _io = (typeof INTEREST_OPEN !== 'undefined') ? INTEREST_OPEN : true;
-            if (_ro) {
-                // leave default
-            } else if (_io) {
-                var n = document.getElementById('navCta');
-                n.href = '/interest';
-                n.textContent = 'Register interest →';
-            } else {
-                document.getElementById('navCta').style.display = 'none';
-            }
+            if (!_io) document.getElementById('navCta').style.display = 'none';
         </script>
     </nav>
 </header>
