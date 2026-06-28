@@ -581,7 +581,7 @@
 </div>
 
 <script>
-  var AVAILABILITY_URL = "https://script.google.com/macros/s/AKfycbz1Se92Z0EgFO2_R9VaeKV1mm3rvqB6LupzRN1cuECEjRQd-uAGPeshufwNYvlOnVR29A/exec";
+  var AVAILABILITY_URL = "https://script.google.com/macros/s/AKfycbz62hfbm6jyHrlxp8HcB868eJy85lssnDzC-mkE_0pHaqjBIsfUbMAqCfZcaC81FHhRgQ/exec";
   var BEDS = 2;
   var currentTab = 'rooms';
   var adminToken = null;
@@ -953,13 +953,15 @@
 
     // Actions footer — no inline args to avoid double-quote conflicts in HTML attributes
     var drawerBtnLabel = isRegistered ? 'Registered ✓' : (isInvited ? 'Invited ✓' : 'Send invite →');
+    var invitedNotRegistered = isInvited && !isRegistered;
     document.getElementById('drawerActions').innerHTML = '<button class="invite-btn" id="drawerInviteBtn"'
       + (isInvited ? ' disabled' : '')
       + ' onclick="sendInviteFromCurrentDrawer()">'
       + drawerBtnLabel
       + '</button>'
       + (isInvited ? ' <button class="view-btn" onclick="resendInviteFromCurrentDrawer()" style="margin-left:8px">Resend invite</button>' : '')
-      + (isInvited ? ' <button class="view-btn" onclick="rescindInviteFromCurrentDrawer()" style="margin-left:8px;border-color:rgba(240,90,62,.4);color:#f05a3e">Rescind</button>' : '');
+      + (invitedNotRegistered ? ' <button class="view-btn" onclick="revokeInviteFromCurrentDrawer()" style="margin-left:8px;border-color:rgba(240,90,62,.4);color:#f05a3e">Revoke invite</button>' : '')
+      + (isRegistered ? ' <button class="view-btn" onclick="deleteRegistrationFromCurrentDrawer()" style="margin-left:8px;border-color:rgba(240,90,62,.4);color:#f05a3e">Delete registration</button>' : '');
 
     // Highlight selected row
     document.querySelectorAll('#interestsTbody tr').forEach(function(tr) { tr.classList.remove('selected'); });
@@ -1011,7 +1013,38 @@
     }, 100);
   }
 
-  function rescindInviteFromCurrentDrawer() {
+  function deleteRegistrationFromCurrentDrawer() {
+    if (currentDrawerIdx === null) return;
+    var row = interestRows[currentDrawerIdx];
+    if (!row) return;
+    function get(k) { return row[k] || row[k.toLowerCase()] || row[k.charAt(0).toUpperCase() + k.slice(1)] || ''; }
+    var email = get('Email') || '';
+    var name  = get('Name')  || '';
+    if (!confirm('Permanently delete the registration for ' + name + '?\n\nThis will remove their Form_Responses row, free their room, and reset their status to Pending so they can be re-invited.')) return;
+    var btn = document.querySelector('#drawerActions .view-btn[onclick*="deleteRegistration"]');
+    if (btn) { btn.textContent = 'Deleting…'; btn.disabled = true; }
+    fetch(AVAILABILITY_URL + '?action=deleteRegistration&adminToken=' + encodeURIComponent(adminToken || '') + '&email=' + encodeURIComponent(email))
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.ok) {
+          var idx = currentDrawerIdx;
+          row['Status'] = row['status'] = '';
+          document.getElementById('istatus-' + idx).innerHTML = statusBadge('');
+          var tableBtn = document.getElementById('ibtn-' + idx);
+          if (tableBtn) { tableBtn.textContent = 'Send invite →'; tableBtn.disabled = false; }
+          closeDrawer();
+        } else {
+          if (btn) { btn.textContent = 'Delete registration'; btn.disabled = false; }
+          alert('Error: ' + (d.error || 'unknown'));
+        }
+      })
+      .catch(function() {
+        if (btn) { btn.textContent = 'Delete registration'; btn.disabled = false; }
+        alert('Network error');
+      });
+  }
+
+  function revokeInviteFromCurrentDrawer() {
     if (currentDrawerIdx === null) return;
     var row = interestRows[currentDrawerIdx];
     if (!row) return;
