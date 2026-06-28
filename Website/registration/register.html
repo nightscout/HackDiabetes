@@ -1738,7 +1738,7 @@
 
         <script>
             var AVAILABILITY_URL =
-                "https://script.google.com/macros/s/AKfycbyaD4fc7wkcNv4gpaHTYvksjjTYrftG05iTkzfeRTpzzugegjyWewwL7KXDN3HJwuul1A/exec";
+                "https://script.google.com/macros/s/AKfycbz1Se92Z0EgFO2_R9VaeKV1mm3rvqB6LupzRN1cuECEjRQd-uAGPeshufwNYvlOnVR29A/exec";
 
             var currentStep = 1;
             var roomType = "double";
@@ -1761,11 +1761,12 @@
                     document.getElementById('inviteGate').style.display = 'none';
                 }
 
-                function showGate() {
+                function showGate(msg) {
                     document.getElementById('prefillLoading').style.display = 'none';
                     document.getElementById('inviteGate').style.display = 'block';
                     document.getElementById('wizardCard').style.display = 'none';
                     document.querySelector('.step-track').style.display = 'none';
+                    if (msg) document.getElementById('inviteGateBody').innerHTML = msg;
                 }
 
                 function showForm() {
@@ -1781,7 +1782,18 @@
                 fetch(AVAILABILITY_URL + '?action=getPrefill&ref=' + encodeURIComponent(ref))
                     .then(function(r) { return r.json(); })
                     .then(function(data) {
-                        if (!data.ok) { showGate(); return; }
+                        if (!data.ok) {
+                            if (data.error === 'already_registered') {
+                                showGate('Your registration is already complete. If you need to make changes, contact us at <a href="mailto:hackdiabetes@nightscoutfoundation.org" style="color:#f05a3e">hackdiabetes@nightscoutfoundation.org</a>.');
+                            } else if (data.error === 'not_invited') {
+                                showGate('This invite link needs to be reissued. Please contact <a href="mailto:hackdiabetes@nightscoutfoundation.org" style="color:#f05a3e">hackdiabetes@nightscoutfoundation.org</a> and we\'ll send you a fresh link.');
+                            } else if (data.error === 'not_found') {
+                                showGate('This invite link is no longer valid — it may have been regenerated. Please check your email for a newer link, or contact <a href="mailto:hackdiabetes@nightscoutfoundation.org" style="color:#f05a3e">hackdiabetes@nightscoutfoundation.org</a> if you need help.');
+                            } else {
+                                showGate();
+                            }
+                            return;
+                        }
                         if (data.firstName) document.getElementById('firstName').value = data.firstName;
                         if (data.lastName)  document.getElementById('lastName').value  = data.lastName;
                         if (data.email)     document.getElementById('email').value     = data.email;
