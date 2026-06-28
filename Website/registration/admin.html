@@ -526,6 +526,7 @@
               <th>Dietary</th>
               <th>T-Shirt</th>
               <th>Status</th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="regsTbody">
@@ -961,7 +962,7 @@
       + '</button>'
       + (isInvited ? ' <button class="view-btn" onclick="resendInviteFromCurrentDrawer()" style="margin-left:8px">Resend invite</button>' : '')
       + (invitedNotRegistered ? ' <button class="view-btn" onclick="revokeInviteFromCurrentDrawer()" style="margin-left:8px;border-color:rgba(240,90,62,.4);color:#f05a3e">Revoke invite</button>' : '')
-      + (isRegistered ? ' <button class="view-btn" onclick="deleteRegistrationFromCurrentDrawer()" style="margin-left:8px;border-color:rgba(240,90,62,.4);color:#f05a3e">Delete registration</button>' : '');
+;
 
     // Highlight selected row
     document.querySelectorAll('#interestsTbody tr').forEach(function(tr) { tr.classList.remove('selected'); });
@@ -1220,9 +1221,35 @@
         + '<td style="color:rgba(255,255,255,.6);font-size:12px">' + escHtml(dietary) + '</td>'
         + '<td style="color:rgba(255,255,255,.6);font-size:12px">' + escHtml(tshirt) + '</td>'
         + '<td>' + regStatusBadge(status) + '</td>'
+        + '<td style="white-space:nowrap"><button class="view-btn" style="border-color:rgba(240,90,62,.4);color:#f05a3e" data-email="' + escHtml(email) + '" data-name="' + escHtml(name) + '" onclick="deleteRegRow(this)">Delete</button></td>'
         + '</tr>';
     });
     document.getElementById('regsTbody').innerHTML = html;
+  }
+
+  function deleteRegRow(btn) {
+    var email = btn.getAttribute('data-email');
+    var name  = btn.getAttribute('data-name');
+    if (!confirm('Permanently delete the registration for ' + name + '?\n\nThis will remove their row and free their room. Their interest status will be reset to Pending.')) return;
+    btn.textContent = 'Deleting…';
+    btn.disabled = true;
+    fetch(AVAILABILITY_URL + '?action=deleteRegistration&adminToken=' + encodeURIComponent(adminToken || '') + '&email=' + encodeURIComponent(email))
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.ok) {
+          var tr = btn.closest('tr');
+          if (tr) tr.remove();
+        } else {
+          btn.textContent = 'Delete';
+          btn.disabled = false;
+          alert('Error: ' + (d.error || 'unknown'));
+        }
+      })
+      .catch(function() {
+        btn.textContent = 'Delete';
+        btn.disabled = false;
+        alert('Network error');
+      });
   }
 
   // ── Boot ──────────────────────────────────────────────────────────────────
