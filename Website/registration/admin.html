@@ -581,7 +581,7 @@
 </div>
 
 <script>
-  var AVAILABILITY_URL = "https://script.google.com/macros/s/AKfycbyaD4fc7wkcNv4gpaHTYvksjjTYrftG05iTkzfeRTpzzugegjyWewwL7KXDN3HJwuul1A/exec";
+  var AVAILABILITY_URL = "https://script.google.com/macros/s/AKfycbz1Se92Z0EgFO2_R9VaeKV1mm3rvqB6LupzRN1cuECEjRQd-uAGPeshufwNYvlOnVR29A/exec";
   var BEDS = 2;
   var currentTab = 'rooms';
   var adminToken = null;
@@ -797,6 +797,7 @@
 
   function statusBadge(val) {
     var v = (val || '').toLowerCase();
+    if (v === 'registered') return '<span class="badge badge-green">Registered</span>';
     if (v.indexOf('invited') !== -1) return '<span class="badge badge-invited">Invited</span>';
     return '<span class="badge badge-pending">Pending</span>';
   }
@@ -843,7 +844,10 @@
       var timestamp  = get('Timestamp') || '';
       var scholarship = get('Scholarship') || '';
       var status     = get('Status') || '';
-      var isInvited  = status.toLowerCase().indexOf('invited') !== -1;
+      var statusLower = status.toLowerCase();
+      var isRegistered = statusLower === 'registered';
+      var isInvited  = statusLower.indexOf('invited') !== -1 || isRegistered;
+      var inviteBtnLabel = isRegistered ? 'Registered ✓' : (isInvited ? 'Invited ✓' : 'Send invite →');
 
       html += '<tr id="irow-' + idx + '">'
         + '<td class="name-cell" style="cursor:pointer" onclick="openDrawer(' + idx + ')">' + escHtml(name) + '</td>'
@@ -856,7 +860,7 @@
         +   ' <button class="invite-btn" id="ibtn-' + idx + '" data-idx="' + idx + '"'
         +     (isInvited ? ' disabled' : '')
         +     ' onclick="sendInviteByIdx(this)">'
-        +     (isInvited ? 'Invited ✓' : 'Send invite →')
+        +     inviteBtnLabel
         +   '</button>'
         + '</td>'
         + '</tr>';
@@ -884,7 +888,9 @@
     var name = get('Name') || '—';
     var email = get('Email') || '—';
     var status = get('Status') || '';
-    var isInvited = status.toLowerCase().indexOf('invited') !== -1;
+    var statusLower = status.toLowerCase();
+    var isRegistered = statusLower === 'registered';
+    var isInvited = statusLower.indexOf('invited') !== -1 || isRegistered;
 
     document.getElementById('drawerName').textContent = name;
 
@@ -946,11 +952,14 @@
     document.getElementById('drawerBody').innerHTML = html;
 
     // Actions footer — no inline args to avoid double-quote conflicts in HTML attributes
+    var drawerBtnLabel = isRegistered ? 'Registered ✓' : (isInvited ? 'Invited ✓' : 'Send invite →');
     document.getElementById('drawerActions').innerHTML = '<button class="invite-btn" id="drawerInviteBtn"'
       + (isInvited ? ' disabled' : '')
       + ' onclick="sendInviteFromCurrentDrawer()">'
-      + (isInvited ? 'Invited ✓' : 'Send invite →')
-      + '</button>';
+      + drawerBtnLabel
+      + '</button>'
+      + (isInvited ? ' <button class="view-btn" onclick="resendInviteFromCurrentDrawer()" style="margin-left:8px">Resend invite</button>' : '')
+      + (isInvited ? ' <button class="view-btn" onclick="rescindInviteFromCurrentDrawer()" style="margin-left:8px;border-color:rgba(240,90,62,.4);color:#f05a3e">Rescind</button>' : '');
 
     // Highlight selected row
     document.querySelectorAll('#interestsTbody tr').forEach(function(tr) { tr.classList.remove('selected'); });
@@ -1000,6 +1009,71 @@
         drawerBtn.disabled    = tableBtn.disabled;
       }
     }, 100);
+  }
+
+  function rescindInviteFromCurrentDrawer() {
+    if (currentDrawerIdx === null) return;
+    var row = interestRows[currentDrawerIdx];
+    if (!row) return;
+    function get(k) { return row[k] || row[k.toLowerCase()] || row[k.charAt(0).toUpperCase() + k.slice(1)] || ''; }
+    var email = get('Email') || '';
+    var name  = get('Name')  || '';
+    var statusLower = (get('Status') || '').toLowerCase();
+    var warningExtra = statusLower === 'registered'
+      ? '\n\nThis person has already registered — their registration and room booking will also be deleted.'
+      : '';
+    if (!confirm('Rescind the invite for ' + name + '? Their link will stop working and status will be reset to Pending.' + warningExtra)) return;
+    var btn = document.querySelector('#drawerActions .view-btn[onclick*="rescind"]');
+    if (btn) { btn.textContent = 'Rescinding…'; btn.disabled = true; }
+    fetch(AVAILABILITY_URL + '?action=rescindInvite&adminToken=' + encodeURIComponent(adminToken || '') + '&email=' + encodeURIComponent(email))
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.ok) {
+          // Reset local state
+          row['Status'] = row['status'] = '';
+          var idx = currentDrawerIdx;
+          document.getElementById('istatus-' + idx).innerHTML = statusBadge('');
+          var tableBtn = document.getElementById('ibtn-' + idx);
+          if (tableBtn) { tableBtn.textContent = 'Send invite →'; tableBtn.disabled = false; }
+          closeDrawer();
+        } else {
+          if (btn) { btn.textContent = 'Rescind'; btn.disabled = false; }
+          alert('Error: ' + (d.error || 'unknown'));
+        }
+      })
+      .catch(function() {
+        if (btn) { btn.textContent = 'Rescind'; btn.disabled = false; }
+        alert('Network error');
+      });
+  }
+
+  function resendInviteFromCurrentDrawer() {
+    if (currentDrawerIdx === null) return;
+    var row = interestRows[currentDrawerIdx];
+    if (!row) return;
+    function get(k) { return row[k] || row[k.toLowerCase()] || row[k.charAt(0).toUpperCase() + k.slice(1)] || ''; }
+    var email = get('Email') || '';
+    var name  = get('Name')  || '';
+    if (!confirm('Regenerate invite link and resend to ' + name + '? This will invalidate any previous link.')) return;
+    var btn = document.querySelector('#drawerActions .view-btn');
+    if (btn) { btn.textContent = 'Sending…'; btn.disabled = true; }
+    fetch(AVAILABILITY_URL + '?action=resendInvite&adminToken=' + encodeURIComponent(adminToken || '') + '&email=' + encodeURIComponent(email))
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.ok) {
+          if (btn) { btn.textContent = 'Sent ✓'; }
+          // Reset status in local data so drawer reflects Invited again
+          row['Status'] = row['status'] = 'Invited';
+          document.getElementById('istatus-' + currentDrawerIdx).innerHTML = statusBadge('Invited');
+        } else {
+          if (btn) { btn.textContent = 'Resend invite'; btn.disabled = false; }
+          alert('Error: ' + (d.error || 'unknown'));
+        }
+      })
+      .catch(function() {
+        if (btn) { btn.textContent = 'Resend invite'; btn.disabled = false; }
+        alert('Network error');
+      });
   }
 
   function sendInviteByIdx(btn) {
