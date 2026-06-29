@@ -1175,7 +1175,7 @@
           interestRows[idx]['Status'] = interestRows[idx]['status'] = 'Invited';
           if (data.prefillToken) interestRows[idx]['prefill token'] = data.prefillToken;
           document.getElementById('istatus-' + idx).innerHTML = statusBadge('Invited');
-          if (currentDrawerIdx === idx) openDrawer(idx);
+          openDrawer(idx);
         } else {
           btn.disabled = false;
           btn.textContent = 'Send invite →';
