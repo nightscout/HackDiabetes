@@ -2192,6 +2192,28 @@
                             el.classList.add("done");
                         }
                     });
+                    // Hotel countdown for single room paid registrations
+                    if (sessionStorage.getItem('hd26_post_payment_hotel')) {
+                        sessionStorage.removeItem('hd26_post_payment_hotel');
+                        var HOTEL_URL = 'https://www.marriott.com/en-us/hotels/yvrps-the-douglas-autograph-collection/overview/';
+                        var COUNTDOWN = 20;
+                        var countEl = document.createElement('div');
+                        countEl.style.cssText = 'margin-top:16px;padding:12px 18px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;font-size:14px;color:#92400e;text-align:center';
+                        countEl.innerHTML = 'Taking you to hotel booking in <strong id="hotelCountdown">' + COUNTDOWN + '</strong> seconds. <a href="' + HOTEL_URL + '" style="color:var(--orange)">Go now →</a>';
+                        var successPanel = document.getElementById('panelSuccess');
+                        if (successPanel) successPanel.appendChild(countEl);
+                        var remaining = COUNTDOWN;
+                        var timer = setInterval(function() {
+                            remaining--;
+                            var cd = document.getElementById('hotelCountdown');
+                            if (cd) cd.textContent = remaining;
+                            if (remaining <= 0) {
+                                clearInterval(timer);
+                                window.open(HOTEL_URL, '_blank');
+                                countEl.innerHTML = 'Hotel booking page opened in a new tab.';
+                            }
+                        }, 1000);
+                    }
                     return;
                 }
                 if (paymentParam === "cancel") {
@@ -3019,17 +3041,15 @@
                     .then(function (data) {
                         hideStepLoading();
                         if (data.status === "ok") {
-                            if (isSingle && !isGroupRate) {
-                                window.open(
-                                    "https://www.marriott.com/en-us/hotels/yvrps-the-douglas-autograph-collection/overview/",
-                                    "_blank",
-                                );
-                            }
                             // Use the server-allocated room label
                             if (data.room && roomType === "double")
                                 roomLabel = data.room;
 
                             if (data.paymentRequired && PAYMENT_URL) {
+                                // Store room type so we can redirect to hotel after payment return
+                                if (isSingle && !isGroupRate) {
+                                    sessionStorage.setItem('hd26_post_payment_hotel', '1');
+                                }
                                 // Redirect to Stripe checkout via Scaleway
                                 showStepLoading("Redirecting to payment…");
                                 fetch(PAYMENT_URL + "/create-checkout", {
