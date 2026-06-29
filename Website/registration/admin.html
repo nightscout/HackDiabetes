@@ -525,11 +525,12 @@
               <th>Dietary</th>
               <th>T-Shirt</th>
               <th>Status</th>
+              <th>Payment</th>
               <th></th>
             </tr>
           </thead>
           <tbody id="regsTbody">
-            <tr><td colspan="8" class="empty-state">Loading…</td></tr>
+            <tr><td colspan="9" class="empty-state">Loading…</td></tr>
           </tbody>
         </table>
       </div>
@@ -556,12 +557,13 @@
               <th>Email</th>
               <th>Submitted</th>
               <th>Scholarship</th>
+              <th>Payment</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody id="interestsTbody">
-            <tr><td colspan="6" class="empty-state">Loading…</td></tr>
+            <tr><td colspan="9" class="empty-state">Loading…</td></tr>
           </tbody>
         </table>
       </div>
@@ -581,7 +583,7 @@
 </div>
 
 <script>
-  var AVAILABILITY_URL = "https://script.google.com/macros/s/AKfycbz62hfbm6jyHrlxp8HcB868eJy85lssnDzC-mkE_0pHaqjBIsfUbMAqCfZcaC81FHhRgQ/exec";
+  var AVAILABILITY_URL = "https://script.google.com/macros/s/AKfycbx6okPoyntPEBGZg5FDQBZay2fhLW6xjvY00ksfvR0HcxdLGJoYHdu2z6mg6lGwhjkdaA/exec";
   var BEDS = 2;
   var currentTab = 'rooms';
   var adminToken = null;
@@ -844,6 +846,7 @@
       var timestamp  = get('Timestamp') || '';
       var scholarship = get('Scholarship') || '';
       var status     = get('Status') || '';
+      var paymentReq = (get('Payment Required') || get('payment required') || '').toLowerCase();
       var statusLower = status.toLowerCase();
       var isRegistered = statusLower === 'registered';
       var isInvited  = statusLower.indexOf('invited') !== -1 || isRegistered;
@@ -854,6 +857,7 @@
         + '<td class="email-cell">' + escHtml(email) + '</td>'
         + '<td>' + formatDate(timestamp) + '</td>'
         + '<td>' + scholarshipBadge(scholarship) + '</td>'
+        + '<td>' + (paymentReq === 'yes' ? '<span class="badge badge-orange">Paid invite</span>' : (paymentReq === 'no' ? '<span class="badge badge-grey">Free invite</span>' : '')) + '</td>'
         + '<td id="istatus-' + idx + '">' + statusBadge(status) + '</td>'
         + '<td style="white-space:nowrap">'
         +   '<button class="view-btn" onclick="openDrawer(' + idx + ')">View</button>'
@@ -994,6 +998,27 @@
     currentDrawerIdx = null;
   }
 
+  function showInviteTypeDialog(name) {
+    // Returns 'free', 'paid', or null if cancelled
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;display:flex;align-items:center;justify-content:center';
+    overlay.innerHTML = '<div style="background:#1e2535;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:32px;max-width:400px;width:90%;text-align:center">'
+      + '<p style="font-size:16px;font-weight:700;margin:0 0 8px">Invite ' + escHtml(name) + '</p>'
+      + '<p style="color:rgba(255,255,255,.5);font-size:13px;margin:0 0 24px">Is this a free or paid registration?</p>'
+      + '<div style="display:flex;gap:12px;justify-content:center">'
+      + '<button id="inviteTypeFree" style="flex:1;background:#1e2535;border:1.5px solid rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:12px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer">Free</button>'
+      + '<button id="inviteTypePaid" style="flex:1;background:#f05a3e;border:none;color:#fff;border-radius:8px;padding:12px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer">Paid</button>'
+      + '</div>'
+      + '<button id="inviteTypeCancel" style="margin-top:16px;background:none;border:none;color:rgba(255,255,255,.4);font-family:inherit;font-size:13px;cursor:pointer">Cancel</button>'
+      + '</div>';
+    document.body.appendChild(overlay);
+    return new Promise(function(resolve) {
+      overlay.querySelector('#inviteTypeFree').onclick   = function() { document.body.removeChild(overlay); resolve('free'); };
+      overlay.querySelector('#inviteTypePaid').onclick   = function() { document.body.removeChild(overlay); resolve('paid'); };
+      overlay.querySelector('#inviteTypeCancel').onclick = function() { document.body.removeChild(overlay); resolve(null); };
+    });
+  }
+
   function sendInviteFromCurrentDrawer() {
     if (currentDrawerIdx === null) return;
     var idx = currentDrawerIdx;
@@ -1095,9 +1120,10 @@
       .then(function(d) {
         if (d.ok) {
           if (btn) { btn.textContent = 'Sent ✓'; }
-          // Reset status in local data so drawer reflects Invited again
           row['Status'] = row['status'] = 'Invited';
+          if (d.prefillToken) row['prefill token'] = d.prefillToken;
           document.getElementById('istatus-' + currentDrawerIdx).innerHTML = statusBadge('Invited');
+          openDrawer(currentDrawerIdx);
         } else {
           if (btn) { btn.textContent = 'Resend invite'; btn.disabled = false; }
           alert('Error: ' + (d.error || 'unknown'));
@@ -1117,24 +1143,32 @@
     sendInvite(idx, get('Email'), get('Name'));
   }
 
-  function sendInvite(idx, email, name) {
-    if (!confirm('Send acceptance email to ' + name + '?')) return;
+  async function sendInvite(idx, email, name) {
+    // Ask free vs paid before sending
+    var choice = await showInviteTypeDialog(name);
+    if (choice === null) return; // cancelled
+    var paid = choice === 'paid';
+
     var btn = document.getElementById('ibtn-' + idx);
     btn.disabled = true;
     btn.textContent = 'Sending…';
 
-    fetch(AVAILABILITY_URL + '?action=sendInvite&adminToken=' + encodeURIComponent(adminToken || '') + '&email=' + encodeURIComponent(email))
+    fetch(AVAILABILITY_URL + '?action=sendInvite&adminToken=' + encodeURIComponent(adminToken || '') + '&email=' + encodeURIComponent(email) + '&paid=' + paid)
       .then(function(r) { return r.json(); })
       .then(function(data) {
         if (data.error === 'unauthorized') { handleUnauthorized(); return; }
         if (data.error === 'already_invited') {
           btn.textContent = 'Already invited';
+          interestRows[idx]['Status'] = interestRows[idx]['status'] = 'Invited';
           document.getElementById('istatus-' + idx).innerHTML = statusBadge('Invited');
           return;
         }
         if (data.ok) {
           btn.textContent = 'Invited ✓';
+          interestRows[idx]['Status'] = interestRows[idx]['status'] = 'Invited';
+          if (data.prefillToken) interestRows[idx]['prefill token'] = data.prefillToken;
           document.getElementById('istatus-' + idx).innerHTML = statusBadge('Invited');
+          if (currentDrawerIdx === idx) openDrawer(idx);
         } else {
           btn.disabled = false;
           btn.textContent = 'Send invite →';
@@ -1153,7 +1187,7 @@
     var icon = document.getElementById('refreshIcon');
     icon.classList.add('spinning');
     document.getElementById('errorMsg').style.display = 'none';
-    document.getElementById('regsTbody').innerHTML = '<tr><td colspan="8" class="empty-state">Loading…</td></tr>';
+    document.getElementById('regsTbody').innerHTML = '<tr><td colspan="9" class="empty-state">Loading…</td></tr>';
 
     fetch(AVAILABILITY_URL + '?action=getRegistrations&adminToken=' + encodeURIComponent(adminToken || ''))
       .then(function(r) { return r.json(); })
@@ -1193,7 +1227,7 @@
     document.getElementById('rStatScholarship').textContent = noId;
 
     if (rows.length === 0) {
-      document.getElementById('regsTbody').innerHTML = '<tr><td colspan="7" class="empty-state">No registrations yet.</td></tr>';
+      document.getElementById('regsTbody').innerHTML = '<tr><td colspan="9" class="empty-state">No registrations yet.</td></tr>';
       return;
     }
 
@@ -1207,8 +1241,16 @@
       var room     = get('Selected Room') || get('selected room') || '—';
       var roommate = get('Roommate Name') || get('roommate name') || '—';
       var dietary  = get('Dietary') || '—';
-      var tshirt   = get('T-Shirt Size') || get('t-shirt size') || '—';
-      var status   = get('Status') || '';
+      var tshirt        = get('T-Shirt Size') || get('t-shirt size') || '—';
+      var status        = get('Status') || '';
+      var paymentStatus = (get('Payment Status') || get('payment status') || '').trim();
+
+      var paymentBadge;
+      var ps = paymentStatus.toLowerCase();
+      if (ps === 'paid')                paymentBadge = '<span class="badge badge-green">Paid</span>';
+      else if (ps === 'pending payment') paymentBadge = '<span class="badge badge-orange">Awaiting Payment</span>';
+      else if (ps === 'free')            paymentBadge = '<span class="badge badge-grey">Not needed</span>';
+      else                               paymentBadge = '<span style="color:rgba(255,255,255,.3);font-size:12px">—</span>';
 
       html += '<tr>'
         + '<td class="name-cell">' + escHtml(name) + '</td>'
@@ -1218,6 +1260,7 @@
         + '<td style="color:rgba(255,255,255,.6);font-size:12px">' + escHtml(dietary) + '</td>'
         + '<td style="color:rgba(255,255,255,.6);font-size:12px">' + escHtml(tshirt) + '</td>'
         + '<td>' + regStatusBadge(status) + '</td>'
+        + '<td>' + paymentBadge + '</td>'
         + '<td style="white-space:nowrap"><button class="view-btn" style="border-color:rgba(240,90,62,.4);color:#f05a3e" data-email="' + escHtml(email) + '" data-name="' + escHtml(name) + '" onclick="deleteRegRow(this)">Delete</button></td>'
         + '</tr>';
     });

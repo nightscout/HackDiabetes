@@ -789,7 +789,11 @@
             footer a:hover {
                 color: var(--orange);
             }
-            @keyframes spin { to { transform: rotate(360deg); } }
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
         </style>
         <script src="config.js"></script>
     </head>
@@ -908,32 +912,155 @@
                 </nav>
 
                 <!-- ── Invite-only gate ── -->
-                <div id="inviteGate" style="display:none;background:#161b26;border-radius:16px;padding:56px 40px;text-align:center;max-width:640px;margin:0 auto 40px">
-                    <div style="font-size:40px;margin-bottom:16px">✉️</div>
-                    <h2 style="color:#fff;font-size:28px;font-weight:800;margin:0 0 12px">Invite required</h2>
-                    <p id="inviteGateBody" style="color:rgba(255,255,255,0.55);font-size:16px;line-height:1.6;margin:0 0 28px">Registration is by invite only. Use the personal link from your invite email to access this form.<br><br>Haven't received an invite yet? Register your interest below.</p>
-                    <div id="inviteGateCta" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-                        <a href="/interest" style="display:inline-block;background:#f05a3e;color:#fff;font-weight:700;font-size:15px;padding:14px 32px;border-radius:8px;text-decoration:none">Register your interest →</a>
+                <div
+                    id="inviteGate"
+                    style="
+                        display: none;
+                        background: #161b26;
+                        border-radius: 16px;
+                        padding: 56px 40px;
+                        text-align: center;
+                        max-width: 640px;
+                        margin: 0 auto 40px;
+                    "
+                >
+                    <div style="font-size: 40px; margin-bottom: 16px">✉️</div>
+                    <h2
+                        style="
+                            color: #fff;
+                            font-size: 28px;
+                            font-weight: 800;
+                            margin: 0 0 12px;
+                        "
+                    >
+                        Invite required
+                    </h2>
+                    <p
+                        id="inviteGateBody"
+                        style="
+                            color: rgba(255, 255, 255, 0.55);
+                            font-size: 16px;
+                            line-height: 1.6;
+                            margin: 0 0 28px;
+                        "
+                    >
+                        Registration is by invite only. Use the personal link
+                        from your invite email to access this form.<br /><br />Haven't
+                        received an invite yet? Register your interest below.
+                    </p>
+                    <div
+                        id="inviteGateCta"
+                        style="
+                            display: flex;
+                            gap: 12px;
+                            justify-content: center;
+                            flex-wrap: wrap;
+                        "
+                    >
+                        <a
+                            href="/interest"
+                            style="
+                                display: inline-block;
+                                background: #f05a3e;
+                                color: #fff;
+                                font-weight: 700;
+                                font-size: 15px;
+                                padding: 14px 32px;
+                                border-radius: 8px;
+                                text-decoration: none;
+                            "
+                            >Register your interest →</a
+                        >
                     </div>
                     <script>
-                        var _io = (typeof INTEREST_OPEN !== 'undefined') ? INTEREST_OPEN : true;
+                        var _io =
+                            typeof INTEREST_OPEN !== "undefined"
+                                ? INTEREST_OPEN
+                                : true;
                         if (!_io) {
-                            document.getElementById('inviteGateCta').style.display = 'none';
-                            document.getElementById('inviteGateBody').innerHTML = 'Registration is by invite only. Use the personal link from your invite email to access this form.';
+                            document.getElementById(
+                                "inviteGateCta",
+                            ).style.display = "none";
+                            document.getElementById(
+                                "inviteGateBody",
+                            ).innerHTML =
+                                "Registration is by invite only. Use the personal link from your invite email to access this form.";
                         }
                     </script>
                 </div>
 
                 <!-- ── Prefill loading state ── -->
-                <div id="prefillLoading" style="display:none;padding:80px 24px;text-align:center;">
-                    <div style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.1);border-top-color:#f05a3e;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 24px"></div>
-                    <p style="color:rgba(255,255,255,0.6);font-size:16px;font-weight:500">Loading your application details…</p>
+                <div
+                    id="prefillLoading"
+                    style="
+                        display: none;
+                        padding: 80px 24px;
+                        text-align: center;
+                    "
+                >
+                    <div
+                        style="
+                            width: 40px;
+                            height: 40px;
+                            border: 3px solid rgba(255, 255, 255, 0.1);
+                            border-top-color: #f05a3e;
+                            border-radius: 50%;
+                            animation: spin 0.8s linear infinite;
+                            margin: 0 auto 24px;
+                        "
+                    ></div>
+                    <p
+                        style="
+                            color: rgba(255, 255, 255, 0.6);
+                            font-size: 16px;
+                            font-weight: 500;
+                        "
+                    >
+                        Loading your application details…
+                    </p>
                 </div>
 
-                <div class="wizard-card" id="wizardCard" style="display:none;position:relative">
-                    <div id="stepLoading" style="display:none;position:absolute;inset:0;background:rgba(255,255,255,0.85);border-radius:inherit;z-index:10;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px">
-                        <div style="width:36px;height:36px;border:3px solid rgba(0,0,0,0.1);border-top-color:#f05a3e;border-radius:50%;animation:spin 0.8s linear infinite"></div>
-                        <p id="stepLoadingMsg" style="color:#374151;font-size:15px;font-weight:500">Loading…</p>
+                <div
+                    class="wizard-card"
+                    id="wizardCard"
+                    style="display: none; position: relative"
+                >
+                    <div
+                        id="stepLoading"
+                        style="
+                            display: none;
+                            position: absolute;
+                            inset: 0;
+                            background: rgba(255, 255, 255, 0.85);
+                            border-radius: inherit;
+                            z-index: 10;
+                            display: none;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 16px;
+                        "
+                    >
+                        <div
+                            style="
+                                width: 36px;
+                                height: 36px;
+                                border: 3px solid rgba(0, 0, 0, 0.1);
+                                border-top-color: #f05a3e;
+                                border-radius: 50%;
+                                animation: spin 0.8s linear infinite;
+                            "
+                        ></div>
+                        <p
+                            id="stepLoadingMsg"
+                            style="
+                                color: #374151;
+                                font-size: 15px;
+                                font-weight: 500;
+                            "
+                        >
+                            Loading…
+                        </p>
                     </div>
 
                     <!-- ── STEP 1: Personal details ── -->
@@ -997,7 +1124,10 @@
                                 />
                             </div>
                             <div class="field">
-                                <label>T-shirt size <span class="req">*</span></label>
+                                <label
+                                    >T-shirt size
+                                    <span class="req">*</span></label
+                                >
                                 <select id="tshirt">
                                     <option value="">— Select —</option>
                                     <option>XS</option>
@@ -1043,7 +1173,8 @@
 
                         <div id="step1Err" class="err">
                             Please fill in all required fields (first name, last
-                            name, email, phone, emergency contact name and phone, t-shirt size).
+                            name, email, phone, emergency contact name and
+                            phone, t-shirt size).
                         </div>
 
                         <div class="btn-row">
@@ -1063,10 +1194,9 @@
                         <div class="panel-head">
                             <h2>Choose your accommodation</h2>
                             <p>
-                                Double rooms are complimentary for all
-                                registered attendees. Single rooms are available
-                                to book directly with the hotel at your own
-                                expense.
+                                Double rooms are complimentary for specified
+                                attendees. Single rooms are available to book
+                                directly with a hotel at your own expense.
                             </p>
                         </div>
 
@@ -1150,7 +1280,9 @@
                                     <div class="rtb-title">Single room</div>
                                     <div class="rtb-desc">
                                         Sole occupancy. Booked and paid directly
-                                        with the JW Marriott Parq Vancouver.
+                                        with the The Douglas, Autograph
+                                        Collection Vancouver (Next door to the
+                                        Marriot).
                                     </div>
                                 </button>
                                 <button
@@ -1219,19 +1351,86 @@
                                                 id="roommateEmail"
                                                 placeholder="their@email.com"
                                                 onblur="checkRoommateEmail()"
-                                                oninput="debouncedRoommateCheck()"
+                                                oninput="
+                                                    debouncedRoommateCheck()
+                                                "
                                             />
                                         </div>
                                         <div
                                             id="roommateCheckResult"
-                                            style="display:none;grid-column:1/-1"
+                                            style="
+                                                display: none;
+                                                grid-column: 1/-1;
+                                            "
                                         ></div>
-                                        <div id="nomineeNotice" style="display:none;grid-column:1/-1;background:#f0f9ff;border:1.5px solid #bae6fd;border-left:4px solid #0284c7;border-radius:10px;padding:14px 16px;font-size:13px;color:#0c4a6e;line-height:1.6">
-                                            <strong style="display:block;margin-bottom:6px;font-size:13px;color:#0369a1">📋 Before you nominate a roommate</strong>
-                                            <ul style="padding-left:18px;margin:0;display:flex;flex-direction:column;gap:5px">
-                                                <li><strong>Email must match exactly</strong> — the email address you enter here must be the same one they use when they complete their own registration. If it doesn't match, they won't be paired with you.</li>
-                                                <li><strong>72-hour hold</strong> — we'll reserve a bed in your room for them. If they haven't registered within 72 hours, the bed will be released and you may be matched with someone else.</li>
-                                                <li><strong>They need an invite</strong> — make sure they've registered their interest and received an invite link before you nominate them.</li>
+                                        <div
+                                            id="nomineeNotice"
+                                            style="
+                                                display: none;
+                                                grid-column: 1/-1;
+                                                background: #f0f9ff;
+                                                border: 1.5px solid #bae6fd;
+                                                border-left: 4px solid #0284c7;
+                                                border-radius: 10px;
+                                                padding: 14px 16px;
+                                                font-size: 13px;
+                                                color: #0c4a6e;
+                                                line-height: 1.6;
+                                            "
+                                        >
+                                            <strong
+                                                style="
+                                                    display: block;
+                                                    margin-bottom: 6px;
+                                                    font-size: 13px;
+                                                    color: #0369a1;
+                                                "
+                                                >📋 Before you nominate a
+                                                roommate</strong
+                                            >
+                                            <ul
+                                                style="
+                                                    padding-left: 18px;
+                                                    margin: 0;
+                                                    display: flex;
+                                                    flex-direction: column;
+                                                    gap: 5px;
+                                                "
+                                            >
+                                                <li>
+                                                    <strong
+                                                        >Email must match
+                                                        exactly</strong
+                                                    >
+                                                    — the email address you
+                                                    enter here must be the same
+                                                    one they use when they
+                                                    complete their own
+                                                    registration. If it doesn't
+                                                    match, they won't be paired
+                                                    with you.
+                                                </li>
+                                                <li>
+                                                    <strong
+                                                        >72-hour hold</strong
+                                                    >
+                                                    — we'll reserve a bed in
+                                                    your room for them. If they
+                                                    haven't registered within 72
+                                                    hours, the bed will be
+                                                    released and you may be
+                                                    matched with someone else.
+                                                </li>
+                                                <li>
+                                                    <strong
+                                                        >They need an
+                                                        invite</strong
+                                                    >
+                                                    — make sure they've
+                                                    registered their interest
+                                                    and received an invite link
+                                                    before you nominate them.
+                                                </li>
                                             </ul>
                                         </div>
                                     </div>
@@ -1277,10 +1476,11 @@
                                             Book directly
                                         </div>
                                         <div class="rtb-desc">
-                                            Book and pay at the standard rate
-                                            through the JW Marriott website.
-                                            We'll send you the link after you
-                                            register.
+                                            Book and pay directly with The
+                                            Douglas, Autograph Collection —
+                                            right next door to the venue and
+                                            generally cheaper for single
+                                            bookings.
                                         </div>
                                     </button>
                                     <button
@@ -1316,9 +1516,10 @@
                                         hotel.</strong
                                     >
                                     Single rooms are not part of the event
-                                    package — you book and pay directly with the
-                                    JW Marriott Parq Vancouver. We'll include
-                                    the hotel link on the next screen.
+                                    package — you book and pay directly with The
+                                    Douglas, Autograph Collection Vancouver.
+                                    We'll include the hotel link on the next
+                                    screen.
                                 </div>
                                 <div
                                     id="singleGroupNote"
@@ -1461,7 +1662,18 @@
                                     style="color: var(--orange)"
                                     >The Douglas, Autograph Collection</a
                                 >
-                                — it's right next door to the venue and generally cheaper for single bookings.
+                                — it's right next door to the venue and
+                                generally cheaper for single bookings.
+                            </div>
+                        </div>
+
+                        <div id="paymentNotice" style="display:none;margin-bottom:1.5rem">
+                            <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:14px 18px;font-size:14px;color:#92400e;display:flex;align-items:center;gap:12px">
+                                <span style="font-size:20px">💳</span>
+                                <div>
+                                    <strong style="display:block;margin-bottom:2px;color:#78350f">Payment required: <span id="paymentPriceDisplay"></span></strong>
+                                    After submitting you'll be redirected to our secure payment page to complete your registration.
+                                </div>
                             </div>
                         </div>
 
@@ -1494,18 +1706,137 @@
                         </div>
 
                         <!-- Roommate nomination confirmation modal -->
-                        <div id="nomineeConfirmOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;display:none;align-items:center;justify-content:center;padding:24px">
-                            <div style="background:#fff;border-radius:16px;padding:36px 32px;max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
-                                <h3 style="font-size:20px;font-weight:800;color:#111827;margin:0 0 8px">Confirm roommate nomination</h3>
-                                <p style="color:#6b7280;font-size:14px;line-height:1.6;margin:0 0 20px">You're nominating <strong id="confirmNomineeName" style="color:#111827"></strong> as your roommate. Before you confirm, please check:</p>
-                                <ul style="color:#374151;font-size:14px;line-height:1.7;padding-left:20px;margin:0 0 20px;display:flex;flex-direction:column;gap:8px">
-                                    <li><strong>Email address:</strong> they must register using <strong id="confirmNomineeEmail" style="color:#0284c7;font-family:monospace;font-size:13px"></strong> — if they use a different email they won't be paired with you.</li>
-                                    <li><strong>72-hour hold:</strong> we'll reserve a bed in your room for them. If they don't complete registration within 72 hours the bed will be released.</li>
-                                    <li><strong>They need their invite link:</strong> they must have received an invite email to complete registration.</li>
+                        <div
+                            id="nomineeConfirmOverlay"
+                            style="
+                                display: none;
+                                position: fixed;
+                                inset: 0;
+                                background: rgba(0, 0, 0, 0.6);
+                                z-index: 200;
+                                display: none;
+                                align-items: center;
+                                justify-content: center;
+                                padding: 24px;
+                            "
+                        >
+                            <div
+                                style="
+                                    background: #fff;
+                                    border-radius: 16px;
+                                    padding: 36px 32px;
+                                    max-width: 520px;
+                                    width: 100%;
+                                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                                "
+                            >
+                                <h3
+                                    style="
+                                        font-size: 20px;
+                                        font-weight: 800;
+                                        color: #111827;
+                                        margin: 0 0 8px;
+                                    "
+                                >
+                                    Confirm roommate nomination
+                                </h3>
+                                <p
+                                    style="
+                                        color: #6b7280;
+                                        font-size: 14px;
+                                        line-height: 1.6;
+                                        margin: 0 0 20px;
+                                    "
+                                >
+                                    You're nominating
+                                    <strong
+                                        id="confirmNomineeName"
+                                        style="color: #111827"
+                                    ></strong>
+                                    as your roommate. Before you confirm, please
+                                    check:
+                                </p>
+                                <ul
+                                    style="
+                                        color: #374151;
+                                        font-size: 14px;
+                                        line-height: 1.7;
+                                        padding-left: 20px;
+                                        margin: 0 0 20px;
+                                        display: flex;
+                                        flex-direction: column;
+                                        gap: 8px;
+                                    "
+                                >
+                                    <li>
+                                        <strong>Email address:</strong> they
+                                        must register using
+                                        <strong
+                                            id="confirmNomineeEmail"
+                                            style="
+                                                color: #0284c7;
+                                                font-family: monospace;
+                                                font-size: 13px;
+                                            "
+                                        ></strong>
+                                        — if they use a different email they
+                                        won't be paired with you.
+                                    </li>
+                                    <li>
+                                        <strong>72-hour hold:</strong> we'll
+                                        reserve a bed in your room for them. If
+                                        they don't complete registration within
+                                        72 hours the bed will be released.
+                                    </li>
+                                    <li>
+                                        <strong
+                                            >They need their invite
+                                            link:</strong
+                                        >
+                                        they must have received an invite email
+                                        to complete registration.
+                                    </li>
                                 </ul>
-                                <div style="display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap">
-                                    <button onclick="closeNomineeConfirm()" style="background:#f3f4f6;color:#374151;border:1.5px solid #d1d5db;border-radius:8px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Go back</button>
-                                    <button onclick="nomineeConfirmed()" style="background:#f05a3e;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Yes, I understand — submit →</button>
+                                <div
+                                    style="
+                                        display: flex;
+                                        gap: 12px;
+                                        justify-content: flex-end;
+                                        flex-wrap: wrap;
+                                    "
+                                >
+                                    <button
+                                        onclick="closeNomineeConfirm()"
+                                        style="
+                                            background: #f3f4f6;
+                                            color: #374151;
+                                            border: 1.5px solid #d1d5db;
+                                            border-radius: 8px;
+                                            padding: 10px 24px;
+                                            font-size: 14px;
+                                            font-weight: 700;
+                                            cursor: pointer;
+                                            font-family: inherit;
+                                        "
+                                    >
+                                        Go back
+                                    </button>
+                                    <button
+                                        onclick="nomineeConfirmed()"
+                                        style="
+                                            background: #f05a3e;
+                                            color: #fff;
+                                            border: none;
+                                            border-radius: 8px;
+                                            padding: 10px 24px;
+                                            font-size: 14px;
+                                            font-weight: 700;
+                                            cursor: pointer;
+                                            font-family: inherit;
+                                        "
+                                    >
+                                        Yes, I understand — submit →
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -1580,6 +1911,36 @@
                                     margin-bottom: 1rem;
                                 "
                             ></div>
+                            <div
+                                id="successPaymentPending"
+                                style="
+                                    display: none;
+                                    max-width: 440px;
+                                    margin: 0 auto 1rem;
+                                    background: #fff8f0;
+                                    border: 1.5px solid #fde5d4;
+                                    border-left: 4px solid var(--orange);
+                                    border-radius: 8px;
+                                    padding: 0.9rem 1.1rem;
+                                    font-size: 13px;
+                                    color: #92400e;
+                                    text-align: left;
+                                "
+                            >
+                                <strong
+                                    style="display: block; margin-bottom: 4px"
+                                    >⚠️ Payment not completed</strong
+                                >
+                                Your registration has been saved but your spot
+                                is not secured until payment is received. Please
+                                contact
+                                <a
+                                    href="mailto:hackdiabetes@nightscoutfoundation.org"
+                                    style="color: #f05a3e"
+                                    >hackdiabetes@nightscoutfoundation.org</a
+                                >
+                                to arrange payment.
+                            </div>
                             <div
                                 id="successRoommateNote"
                                 style="
@@ -1738,7 +2099,17 @@
 
         <script>
             var AVAILABILITY_URL =
-                "https://script.google.com/macros/s/AKfycbz62hfbm6jyHrlxp8HcB868eJy85lssnDzC-mkE_0pHaqjBIsfUbMAqCfZcaC81FHhRgQ/exec";
+                "https://script.google.com/macros/s/AKfycbx6okPoyntPEBGZg5FDQBZay2fhLW6xjvY00ksfvR0HcxdLGJoYHdu2z6mg6lGwhjkdaA/exec";
+            var PAYMENT_URL =
+                "https://hackdiabetespaymentzmtd3m4r-fct-brave-mcnulty.functions.fnc.fr-par.scw.cloud";
+            var TICKET_PRICE_DISPLAY = null;
+            var isPaidInvite = false;
+            var priceReady = PAYMENT_URL
+                ? fetch(PAYMENT_URL + '/price')
+                    .then(function(r) { return r.json(); })
+                    .then(function(d) { if (d.display) TICKET_PRICE_DISPLAY = d.display; })
+                    .catch(function() {})
+                : Promise.resolve();
 
             var currentStep = 1;
             var roomType = "double";
@@ -1751,66 +2122,175 @@
             var sessionToken = null;
 
             // ── Prefill from invite link (?ref=UUID) — gates form to invited people ──
-            (function() {
+            (function () {
                 var params = new URLSearchParams(window.location.search);
-                var ref = params.get('ref');
+                var ref = params.get("ref");
 
                 function showLoading() {
-                    document.getElementById('prefillLoading').style.display = 'block';
-                    document.getElementById('wizardCard').style.display = 'none';
-                    document.getElementById('inviteGate').style.display = 'none';
+                    document.getElementById("prefillLoading").style.display =
+                        "block";
+                    document.getElementById("wizardCard").style.display =
+                        "none";
+                    document.getElementById("inviteGate").style.display =
+                        "none";
                 }
 
                 function showGate(msg) {
-                    document.getElementById('prefillLoading').style.display = 'none';
-                    document.getElementById('inviteGate').style.display = 'block';
-                    document.getElementById('wizardCard').style.display = 'none';
-                    document.querySelector('.step-track').style.display = 'none';
-                    if (msg) document.getElementById('inviteGateBody').innerHTML = msg;
+                    document.getElementById("prefillLoading").style.display =
+                        "none";
+                    document.getElementById("inviteGate").style.display =
+                        "block";
+                    document.getElementById("wizardCard").style.display =
+                        "none";
+                    document.querySelector(".step-track").style.display =
+                        "none";
+                    if (msg)
+                        document.getElementById("inviteGateBody").innerHTML =
+                            msg;
                 }
 
                 function showForm() {
-                    document.getElementById('prefillLoading').style.display = 'none';
-                    document.getElementById('inviteGate').style.display = 'none';
-                    document.getElementById('wizardCard').style.display = 'block';
+                    document.getElementById("prefillLoading").style.display =
+                        "none";
+                    document.getElementById("inviteGate").style.display =
+                        "none";
+                    document.getElementById("wizardCard").style.display =
+                        "block";
                 }
 
-                if (!ref) { showGate(); return; }
+                // Handle Stripe return URLs
+                var paymentParam = params.get("payment");
+                if (paymentParam === "success") {
+                    document.getElementById("prefillLoading").style.display =
+                        "none";
+                    document.getElementById("wizardCard").style.display =
+                        "block";
+                    document.getElementById("inviteGate").style.display =
+                        "none";
+                    document.querySelector(".step-track").style.display =
+                        "none";
+                    ["panel1", "panel2", "panel3"].forEach(function (id) {
+                        var el = document.getElementById(id);
+                        if (el) el.classList.remove("active");
+                    });
+                    var panel = document.getElementById("panelSuccess");
+                    if (panel) panel.classList.add("active");
+                    var roomLine = document.getElementById("successRoomLine");
+                    if (roomLine) {
+                        roomLine.textContent =
+                            "✅ Payment confirmed — you're all set!";
+                        roomLine.style.background = "#f0fdf4";
+                        roomLine.style.borderColor = "#bbf7d0";
+                        roomLine.style.color = "#166534";
+                    }
+                    var swLine = document.getElementById("swLine");
+                    if (swLine) swLine.style.width = "100%";
+                    ["st1", "st2", "st3"].forEach(function (id) {
+                        var el = document.getElementById(id);
+                        if (el) {
+                            el.classList.remove("active");
+                            el.classList.add("done");
+                        }
+                    });
+                    return;
+                }
+                if (paymentParam === "cancel") {
+                    document.getElementById("prefillLoading").style.display =
+                        "none";
+                    document.querySelector(".step-track").style.display =
+                        "none";
+                    showGate(
+                        'Your registration was saved but payment was not completed. Please contact <a href="mailto:hackdiabetes@nightscoutfoundation.org" style="color:#f05a3e">hackdiabetes@nightscoutfoundation.org</a> to complete your payment and secure your spot.',
+                    );
+                    return;
+                }
+
+                if (!ref) {
+                    showGate();
+                    return;
+                }
 
                 showLoading();
 
-                fetch(AVAILABILITY_URL + '?action=getPrefill&ref=' + encodeURIComponent(ref))
-                    .then(function(r) { return r.json(); })
-                    .then(function(data) {
+                fetch(
+                    AVAILABILITY_URL +
+                        "?action=getPrefill&ref=" +
+                        encodeURIComponent(ref),
+                )
+                    .then(function (r) {
+                        return r.json();
+                    })
+                    .then(function (data) {
                         if (!data.ok) {
-                            if (data.error === 'already_registered') {
-                                showGate('Your registration is already complete. If you need to make changes, contact us at <a href="mailto:hackdiabetes@nightscoutfoundation.org" style="color:#f05a3e">hackdiabetes@nightscoutfoundation.org</a>.');
-                            } else if (data.error === 'not_invited') {
-                                showGate('This invite link needs to be reissued. Please contact <a href="mailto:hackdiabetes@nightscoutfoundation.org" style="color:#f05a3e">hackdiabetes@nightscoutfoundation.org</a> and we\'ll send you a fresh link.');
-                            } else if (data.error === 'not_found') {
-                                showGate('This invite link is no longer valid — it may have been regenerated. Please check your email for a newer link, or contact <a href="mailto:hackdiabetes@nightscoutfoundation.org" style="color:#f05a3e">hackdiabetes@nightscoutfoundation.org</a> if you need help.');
+                            if (data.error === "already_registered") {
+                                showGate(
+                                    'Your registration is already complete. If you need to make changes, contact us at <a href="mailto:hackdiabetes@nightscoutfoundation.org" style="color:#f05a3e">hackdiabetes@nightscoutfoundation.org</a>.',
+                                );
+                            } else if (data.error === "not_invited") {
+                                showGate(
+                                    'This invite link needs to be reissued. Please contact <a href="mailto:hackdiabetes@nightscoutfoundation.org" style="color:#f05a3e">hackdiabetes@nightscoutfoundation.org</a> and we\'ll send you a fresh link.',
+                                );
+                            } else if (data.error === "not_found") {
+                                showGate(
+                                    'This invite link is no longer valid — it may have been regenerated. Please check your email for a newer link, or contact <a href="mailto:hackdiabetes@nightscoutfoundation.org" style="color:#f05a3e">hackdiabetes@nightscoutfoundation.org</a> if you need help.',
+                                );
                             } else {
                                 showGate();
                             }
                             return;
                         }
-                        if (data.firstName) document.getElementById('firstName').value = data.firstName;
-                        if (data.lastName)  document.getElementById('lastName').value  = data.lastName;
-                        if (data.email)     document.getElementById('email').value     = data.email;
-                        if (data.phone)     document.getElementById('phone').value     = data.phone;
+                        if (data.firstName)
+                            document.getElementById("firstName").value =
+                                data.firstName;
+                        if (data.lastName)
+                            document.getElementById("lastName").value =
+                                data.lastName;
+                        if (data.email)
+                            document.getElementById("email").value = data.email;
+                        if (data.phone)
+                            document.getElementById("phone").value = data.phone;
                         if (data.scholarship) {
-                            var radio = document.querySelector('input[name="scholarship"][value="' + data.scholarship + '"]');
+                            var radio = document.querySelector(
+                                'input[name="scholarship"][value="' +
+                                    data.scholarship +
+                                    '"]',
+                            );
                             if (radio) {
                                 radio.checked = true;
-                                if (typeof toggleScholarship === 'function') toggleScholarship(radio);
+                                if (typeof toggleScholarship === "function")
+                                    toggleScholarship(radio);
                             }
                         }
+                        isPaidInvite = !!data.paymentRequired;
+                        if (isPaidInvite) {
+                            var notice = document.getElementById('paymentNotice');
+                            if (notice) notice.style.display = 'block';
+                            priceReady.then(function() {
+                                var priceEl = document.getElementById('paymentPriceDisplay');
+                                if (priceEl) priceEl.textContent = TICKET_PRICE_DISPLAY || '';
+                            });
+                            var btnDouble =
+                                document.getElementById("btnDouble");
+                            if (btnDouble) btnDouble.style.display = "none";
+                            var subhead = document.querySelector(
+                                "#panel2 .panel-head p",
+                            );
+                            if (subhead)
+                                subhead.textContent =
+                                    "Single rooms are available to book directly with the hotel at your own expense.";
+                            // Default selection to single since double is hidden
+                            if (typeof setRoomType === "function")
+                                setRoomType("single");
+                        }
                         showForm();
-                        setTimeout(function() {
-                            if (typeof updateStep1Btn === 'function') updateStep1Btn();
+                        setTimeout(function () {
+                            if (typeof updateStep1Btn === "function")
+                                updateStep1Btn();
                         }, 0);
                     })
-                    .catch(function() { showGate(); });
+                    .catch(function () {
+                        showGate();
+                    });
             })();
 
             function solvePoW(nonce, difficulty) {
@@ -1949,16 +2429,17 @@
 
             // ── Reservation check ──
             function showStepLoading(msg) {
-                var el = document.getElementById('stepLoading');
-                document.getElementById('stepLoadingMsg').textContent = msg || 'Loading…';
-                el.style.display = 'flex';
+                var el = document.getElementById("stepLoading");
+                document.getElementById("stepLoadingMsg").textContent =
+                    msg || "Loading…";
+                el.style.display = "flex";
             }
             function hideStepLoading() {
-                document.getElementById('stepLoading').style.display = 'none';
+                document.getElementById("stepLoading").style.display = "none";
             }
 
             function checkReservation(email, callback) {
-                showStepLoading('Checking your details…');
+                showStepLoading("Checking your details…");
                 fetch(
                     AVAILABILITY_URL +
                         "?action=checkReservation&email=" +
@@ -2034,14 +2515,30 @@
 
             // ── Validation ──
             function step1Complete() {
-                return v("firstName") && v("lastName") && ve("email") && vp("phone") && v("emergencyName") && vp("emergencyPhone") && v("tshirt");
+                return (
+                    v("firstName") &&
+                    v("lastName") &&
+                    ve("email") &&
+                    vp("phone") &&
+                    v("emergencyName") &&
+                    vp("emergencyPhone") &&
+                    v("tshirt")
+                );
             }
 
             function updateStep1Btn() {
                 document.getElementById("step1Btn").disabled = !step1Complete();
             }
 
-            ["firstName","lastName","email","phone","emergencyName","emergencyPhone","tshirt"].forEach(function(id) {
+            [
+                "firstName",
+                "lastName",
+                "email",
+                "phone",
+                "emergencyName",
+                "emergencyPhone",
+                "tshirt",
+            ].forEach(function (id) {
                 var el = document.getElementById(id);
                 if (el) el.addEventListener("input", updateStep1Btn);
                 if (el) el.addEventListener("change", updateStep1Btn);
@@ -2056,7 +2553,9 @@
             }
             function validateStep2() {
                 if (roommateFieldBlocked) {
-                    document.getElementById("roommateEmail").scrollIntoView({ behavior: "smooth" });
+                    document
+                        .getElementById("roommateEmail")
+                        .scrollIntoView({ behavior: "smooth" });
                     return false;
                 }
                 if (document.getElementById("matchPref").value === "nominate") {
@@ -2068,11 +2567,15 @@
                         document.getElementById("roommateEmail").focus();
                         return false;
                     }
-                    if (g("roommateEmail").toLowerCase() === g("email").toLowerCase()) {
+                    if (
+                        g("roommateEmail").toLowerCase() ===
+                        g("email").toLowerCase()
+                    ) {
                         document.getElementById("roommateEmail").focus();
                         var el = document.getElementById("roommateCheckResult");
                         el.style.display = "";
-                        el.innerHTML = '<span style="color:#f05a3e;font-size:13px">You can\'t nominate yourself as a roommate.</span>';
+                        el.innerHTML =
+                            '<span style="color:#f05a3e;font-size:13px">You can\'t nominate yourself as a roommate.</span>';
                         return false;
                     }
                 }
@@ -2176,10 +2679,13 @@
 
             function debouncedRoommateCheck() {
                 clearTimeout(roommateCheckTimer);
-                var email = document.getElementById("roommateEmail").value.trim();
+                var email = document
+                    .getElementById("roommateEmail")
+                    .value.trim();
                 var step2Btn = document.getElementById("step2Btn");
                 if (email === roommateLastChecked) return;
-                document.getElementById("roommateCheckResult").style.display = "none";
+                document.getElementById("roommateCheckResult").style.display =
+                    "none";
                 if (step2Btn) step2Btn.disabled = true;
                 // Only queue a check once the email looks complete
                 if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
@@ -2187,7 +2693,9 @@
             }
 
             function checkRoommateEmail() {
-                var email = document.getElementById("roommateEmail").value.trim();
+                var email = document
+                    .getElementById("roommateEmail")
+                    .value.trim();
                 if (email && email === roommateLastChecked) return; // skip if unchanged
                 var email = document
                     .getElementById("roommateEmail")
@@ -2202,7 +2710,8 @@
                 }
                 if (email.toLowerCase() === g("email").toLowerCase()) {
                     el.style.display = "";
-                    el.innerHTML = '<span style="color:#f05a3e;font-size:13px;font-weight:600">You can\'t nominate yourself as a roommate.</span>';
+                    el.innerHTML =
+                        '<span style="color:#f05a3e;font-size:13px;font-weight:600">You can\'t nominate yourself as a roommate.</span>';
                     roommateFieldBlocked = true;
                     if (step2Btn) step2Btn.disabled = true;
                     return;
@@ -2257,7 +2766,7 @@
                             if (step2Btn) step2Btn.disabled = false;
                             el.innerHTML =
                                 '<div style="background:#fff7ed;border:1.5px solid #fed7aa;border-left:4px solid var(--orange);border-radius:8px;padding:.9rem 1.1rem;font-size:13px;color:#92400e">' +
-                                '<strong style="color:var(--orange2);display:block;margin-bottom:3px">They\'ve been invited but haven\'t registered yet</strong>' +
+                                "<strong style=\"color:var(--orange2);display:block;margin-bottom:3px\">They've been invited but haven't registered yet</strong>" +
                                 "You can still nominate them — we'll hold a bed. They'll complete their registration using their invite link." +
                                 "</div>";
                         } else {
@@ -2295,9 +2804,13 @@
                 var pref = document.getElementById("matchPref").value;
                 var hasNominee = pref === "nominate" && g("roommateEmail");
                 if (hasNominee) {
-                    document.getElementById("confirmNomineeName").textContent = g("roommateName") || g("roommateEmail");
-                    document.getElementById("confirmNomineeEmail").textContent = g("roommateEmail");
-                    var overlay = document.getElementById("nomineeConfirmOverlay");
+                    document.getElementById("confirmNomineeName").textContent =
+                        g("roommateName") || g("roommateEmail");
+                    document.getElementById("confirmNomineeEmail").textContent =
+                        g("roommateEmail");
+                    var overlay = document.getElementById(
+                        "nomineeConfirmOverlay",
+                    );
                     overlay.style.display = "flex";
                 } else {
                     submitForm();
@@ -2305,7 +2818,8 @@
             }
 
             function closeNomineeConfirm() {
-                document.getElementById("nomineeConfirmOverlay").style.display = "none";
+                document.getElementById("nomineeConfirmOverlay").style.display =
+                    "none";
             }
 
             function nomineeConfirmed() {
@@ -2342,7 +2856,6 @@
                 document.getElementById("rv-name").textContent = name;
                 document.getElementById("rv-email").textContent = g("email");
                 document.getElementById("rv-phone").textContent = g("phone");
-
 
                 var dietary = g("dietary");
                 if (dietary) {
@@ -2469,7 +2982,7 @@
                 var btn = document.getElementById("submitBtn");
                 btn.disabled = true;
                 btn.textContent = "Submitting…";
-                showStepLoading('Submitting your registration…');
+                showStepLoading("Submitting your registration…");
 
                 var payload = {
                     name: name,
@@ -2515,12 +3028,55 @@
                             // Use the server-allocated room label
                             if (data.room && roomType === "double")
                                 roomLabel = data.room;
-                            showSuccess(
-                                roomLabel,
-                                isGroupRate,
-                                roomType === "double",
-                                data.roommateFound,
-                            );
+
+                            if (data.paymentRequired && PAYMENT_URL) {
+                                // Redirect to Stripe checkout via Scaleway
+                                showStepLoading("Redirecting to payment…");
+                                fetch(PAYMENT_URL + "/create-checkout", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({
+                                        email: email,
+                                        name: name,
+                                    }),
+                                })
+                                    .then(function (r) {
+                                        return r.json();
+                                    })
+                                    .then(function (p) {
+                                        if (p.url) {
+                                            window.location.href = p.url;
+                                        } else {
+                                            hideStepLoading();
+                                            showSuccess(
+                                                roomLabel,
+                                                isGroupRate,
+                                                roomType === "double",
+                                                data.roommateFound,
+                                                true,
+                                            );
+                                        }
+                                    })
+                                    .catch(function () {
+                                        hideStepLoading();
+                                        showSuccess(
+                                            roomLabel,
+                                            isGroupRate,
+                                            roomType === "double",
+                                            data.roommateFound,
+                                            true,
+                                        );
+                                    });
+                            } else {
+                                showSuccess(
+                                    roomLabel,
+                                    isGroupRate,
+                                    roomType === "double",
+                                    data.roommateFound,
+                                );
+                            }
                         } else {
                             btn.disabled = false;
                             btn.textContent = "Submit registration →";
@@ -2596,6 +3152,7 @@
                 isGroupRate,
                 isAutoMatch,
                 roommateFound,
+                paymentPending,
             ) {
                 ["panel1", "panel2", "panel3"].forEach(function (id) {
                     var el = document.getElementById(id);
@@ -2624,6 +3181,12 @@
                     roomLine.style.borderColor = "#bbf7d0";
                     roomLine.style.color = "#166534";
                 }
+                var paymentNote = document.getElementById(
+                    "successPaymentPending",
+                );
+                if (paymentNote)
+                    paymentNote.style.display = paymentPending ? "" : "none";
+
                 var roommateNote = document.getElementById(
                     "successRoommateNote",
                 );
