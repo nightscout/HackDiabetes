@@ -195,7 +195,12 @@
                     <span>Nov 14–16, 2026</span>
                 </div>
                 <h1>Register your<br><span class="accent">interest.</span></h1>
-                <p>Registration isn't open yet — let us know you're interested and we'll be in touch when spots become available.</p>
+                <p id="regStatusText"></p>
+                <script>
+                  document.getElementById('regStatusText').textContent = (typeof INTEREST_OPEN !== 'undefined' ? INTEREST_OPEN : true)
+                    ? 'Registration is now open — we are looking forward to your submissions.'
+                    : 'Registration isn\'t open yet — let us know you\'re interested and we\'ll be in touch when spots become available.';
+                </script>
             </div>
         </section>
 
