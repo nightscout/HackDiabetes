@@ -1096,6 +1096,7 @@
         if (d.ok) {
           // Reset local state
           row['Status'] = row['status'] = '';
+          row['prefill token'] = row['Prefill Token'] = '';
           var idx = currentDrawerIdx;
           document.getElementById('istatus-' + idx).innerHTML = statusBadge('');
           var tableBtn = document.getElementById('ibtn-' + idx);
@@ -1167,7 +1168,9 @@
         if (data.error === 'already_invited') {
           btn.textContent = 'Already invited';
           interestRows[idx]['Status'] = interestRows[idx]['status'] = 'Invited';
+          if (data.prefillToken) interestRows[idx]['prefill token'] = data.prefillToken;
           document.getElementById('istatus-' + idx).innerHTML = statusBadge('Invited');
+          openDrawer(idx);
           return;
         }
         if (data.ok) {
