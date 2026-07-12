@@ -791,16 +791,19 @@
 
   function scholarshipBadge(val) {
     var v = (val || '').toLowerCase();
-    if (v.indexOf('cannot') !== -1 || v.indexOf('without') !== -1) {
-      return '<span class="badge badge-orange">Cannot attend without</span>';
-    }
-    if (v.indexOf('some') !== -1 || v.indexOf('assistance') !== -1 || v.indexOf('partial') !== -1) {
-      return '<span class="badge badge-yellow">Some assistance</span>';
-    }
-    if (v.indexOf('no') !== -1 || v.indexOf('self') !== -1 || v === '' || v === 'no assistance needed') {
+    if (!val || v.trim() === '') return '<span class="badge badge-grey">—</span>';
+    // "I do not need any financial assistance"
+    if (v.indexOf('do not need') !== -1 || v.indexOf('not need any') !== -1 || v.indexOf('no assistance') !== -1) {
       return '<span class="badge badge-green">No assistance</span>';
     }
-    if (!val || val.trim() === '') return '<span class="badge badge-grey">—</span>';
+    // "I cannot attend without financial assistance"
+    if (v.indexOf('cannot attend') !== -1 || v.indexOf('cannot') !== -1) {
+      return '<span class="badge badge-orange">Cannot attend without</span>';
+    }
+    // "...some assistance would be helpful"
+    if (v.indexOf('some assistance') !== -1 || v.indexOf('would be helpful') !== -1 || v.indexOf('partial') !== -1) {
+      return '<span class="badge badge-yellow">Some assistance</span>';
+    }
     return '<span class="badge badge-grey">' + escHtml(val) + '</span>';
   }
 
