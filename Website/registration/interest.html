@@ -436,20 +436,34 @@
                 });
             }
 
-            fetch(AVAILABILITY_URL + "?action=initSession")
-                .then(function(r) { return r.json(); })
-                .then(function(d) {
-                    if (!d.token || !d.nonce) return;
-                    sessionToken = d.token;
-                    return solvePoW(d.nonce, d.difficulty || 20)
-                        .then(function(counter) {
-                            return fetch(AVAILABILITY_URL + "?action=redeemSession&token=" +
-                                encodeURIComponent(sessionToken) + "&counter=" + counter);
-                        })
-                        .then(function(r) { return r.json(); })
-                        .then(function(d) { if (!d.ok) sessionToken = null; });
-                })
-                .catch(function() {});
+            (function() {
+                var btn = document.getElementById("submitBtn");
+                btn.disabled = true;
+                btn.textContent = "Preparing form…";
+                fetch(AVAILABILITY_URL + "?action=initSession")
+                    .then(function(r) { return r.json(); })
+                    .then(function(d) {
+                        if (!d.token || !d.nonce) throw new Error('bad init');
+                        sessionToken = d.token;
+                        return solvePoW(d.nonce, d.difficulty || 20)
+                            .then(function(counter) {
+                                return fetch(AVAILABILITY_URL + "?action=redeemSession&token=" +
+                                    encodeURIComponent(sessionToken) + "&counter=" + counter);
+                            })
+                            .then(function(r) { return r.json(); })
+                            .then(function(d) {
+                                if (!d.ok) { sessionToken = null; throw new Error('redeem failed'); }
+                            });
+                    })
+                    .then(function() {
+                        btn.disabled = false;
+                        btn.textContent = "Submit interest →";
+                    })
+                    .catch(function() {
+                        btn.disabled = false;
+                        btn.textContent = "Submit interest →";
+                    });
+            })();
 
             // ── localStorage draft ────────────────────────────────────────────
             var DRAFT_FIELDS = ["firstName","lastName","email","phone","about","contribution","virtualInterest","vtopicOtherText","fundingOtherText"];
