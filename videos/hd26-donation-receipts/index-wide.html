@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px; height: 1080px; overflow: hidden; background: #0e1117;
+      }
+      body { font-family: "Inter", sans-serif; }
+
+      :root {
+        --dark: #0e1117; --dark2: #161b26; --dark3: #1e2535;
+        --green: #27c55e; --green2: #1ea34f;
+        --orange: #f05a3e; --orange2: #d44429;
+        --white: #ffffff; --muted: rgba(255,255,255,.5);
+        --hair: rgba(255,255,255,.10);
+      }
+
+      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+
+      /* ── full-bleed background (never on root) ── */
+      #bg {
+        position: absolute; inset: 0;
+        background:
+          radial-gradient(120% 80% at 50% 8%, #1a2233 0%, #0e1117 60%),
+          linear-gradient(180deg, #0e1117 0%, #10141d 100%);
+      }
+      #bg-blob {
+        position: absolute; left: 50%; top: 50%;
+        width: 1300px; transform: translate(-50%, -50%);
+        opacity: 0.05; filter: saturate(1.2);
+      }
+      #bg-grid {
+        position: absolute; inset: 0; opacity: 0.5;
+        background-image:
+          linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+        background-size: 90px 90px;
+        mask-image: radial-gradient(80% 60% at 50% 45%, #000 30%, transparent 80%);
+        -webkit-mask-image: radial-gradient(80% 60% at 50% 45%, #000 30%, transparent 80%);
+      }
+
+      /* ── persistent chrome ── */
+      .chrome { position: absolute; z-index: 40; }
+      #chrome-owl { top: 70px; left: 70px; width: 68px; height: 68px; color: rgba(255,255,255,.32); }
+      #chrome-owl svg { width: 100%; height: 100%; display: block; }
+      #chrome-tag {
+        bottom: 92px; left: 50%; transform: translateX(-50%);
+        font-family: "JetBrains Mono", monospace; font-weight: 700;
+        font-size: 25px; letter-spacing: 0.14em; text-transform: uppercase;
+        color: rgba(255,255,255,.42); white-space: nowrap;
+      }
+      #chrome-tag b { color: var(--orange); }
+      #progress { position: absolute; left: 0; bottom: 0; width: 1920px; height: 8px; background: rgba(255,255,255,.06); z-index: 40; }
+      #progress-fill { position: absolute; left: 0; top: 0; height: 100%; width: 100%; background: var(--orange); transform: scaleX(0); transform-origin: left center; }
+
+      /* ── section-turn wipe (transition) ── */
+      #wipe {
+        position: absolute; top: 0; left: 0; width: 1920px; height: 1080px;
+        background: var(--orange); z-index: 60;
+        display: flex; align-items: center; justify-content: center;
+        will-change: transform;
+      }
+      #wipe-label {
+        font-family: "JetBrains Mono", monospace; font-weight: 700;
+        font-size: 66px; letter-spacing: 0.16em; text-transform: uppercase; color: #fff;
+      }
+
+      /* ── beat scaffold ── */
+      .beat {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column; justify-content: center;
+        padding: 0 140px; z-index: 10;
+      }
+      .eyebrow {
+        font-family: "JetBrains Mono", monospace; font-weight: 700;
+        font-size: 30px; letter-spacing: 0.18em; text-transform: uppercase;
+        color: var(--muted); margin-bottom: 34px;
+      }
+      .eyebrow .idx { color: var(--green); }
+      .statement {
+        font-family: "Inter", sans-serif; font-weight: 900;
+        font-size: 128px; line-height: 0.98; letter-spacing: -0.03em;
+        color: var(--white);
+      }
+      .statement .g { color: var(--green); }
+      .statement .o { color: var(--orange); }
+
+      /* ── receipt (device) beats ── */
+      .device-name {
+        font-family: "Inter", sans-serif; font-weight: 900;
+        font-size: 132px; line-height: 0.94; letter-spacing: -0.035em;
+        color: var(--white); margin-bottom: 26px;
+      }
+      .device-do {
+        font-family: "JetBrains Mono", monospace; font-weight: 700;
+        font-size: 46px; letter-spacing: 0.04em; color: var(--green);
+        display: inline-block;
+      }
+      .stamprow { display: flex; align-items: center; gap: 30px; position: absolute; right: 140px; top: 50%; transform: translateY(-50%); }
+      .stamp {
+        width: 118px; height: 118px; border-radius: 50%;
+        background: var(--green); display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 0 0 10px rgba(39,197,94,.14), 0 18px 40px rgba(39,197,94,.28);
+      }
+      .stamp svg { width: 62px; height: 62px; }
+      .stamp-label {
+        font-family: "JetBrains Mono", monospace; font-weight: 700;
+        font-size: 40px; letter-spacing: 0.22em; color: var(--green); text-transform: uppercase;
+      }
+
+      /* ── beat 2 photo ── */
+      #b2 { justify-content: flex-end; padding-bottom: 150px; }
+      .photo-wrap { position: absolute; inset: 0; overflow: hidden; z-index: -1; }
+      .photo-wrap img { width: 100%; height: 100%; object-fit: cover; }
+      .photo-scrim {
+        position: absolute; inset: 0;
+        background: linear-gradient(180deg, rgba(14,17,23,.35) 0%, rgba(14,17,23,.55) 42%, rgba(14,17,23,.96) 92%);
+      }
+
+      /* ── line break helper (avoid <br> in headings) ── */
+      .ln { display: block; }
+      /* ── beat 6 underline ── */
+      .uline { position: relative; display: inline-block; }
+      .ul-bar {
+        position: absolute; left: 0; bottom: -22px; height: 12px; width: 100%;
+        background: var(--orange); border-radius: 6px; transform: scaleX(0); transform-origin: left center;
+      }
+
+      /* ── beat 9 lines ── */
+      .kline { font-family: "Inter", sans-serif; font-weight: 900; font-size: 134px; line-height: 1.0; letter-spacing: -0.035em; color: var(--white); }
+
+      /* ── beat 10 CTA ── */
+      #b10 { justify-content: center; align-items: center; text-align: center; padding: 0 84px; }
+      #cta-head { font-family: "Inter", sans-serif; font-weight: 900; font-size: 96px; line-height: 1.0; letter-spacing: -0.03em; color: var(--white); margin-bottom: 8px; }
+      #cta-head .o { color: var(--orange); }
+      #cta-molecule { width: 360px; margin: 26px auto 22px; display: block; }
+      #cta-event { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 38px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 54px; }
+      #cta-btn {
+        display: inline-flex; align-items: center; gap: 20px;
+        background: var(--orange); color: #fff; border-radius: 18px;
+        padding: 34px 58px; box-shadow: 0 20px 60px rgba(240,90,62,.45);
+      }
+      #cta-btn .lbl { font-family: "Inter", sans-serif; font-weight: 900; font-size: 52px; letter-spacing: -0.01em; }
+      #cta-btn .sub { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 30px; letter-spacing: 0.06em; opacity: .92; }
+      #cta-wordmark { width: 420px; margin: 60px auto 0; display: block; opacity: .9; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="30" data-width="1920" data-height="1080">
+      <!-- music bed (30s, pre-faded + loudness-normalized) -->
+      <audio id="bgm" src="assets/music-bed.mp3" data-start="0" data-duration="30" data-track-index="10" data-volume="0.85"></audio>
+
+      <!-- background -->
+      <div id="bg">
+        <img id="bg-blob" src="assets/blob.svg" alt="" />
+        <div id="bg-grid"></div>
+      </div>
+
+      <!-- persistent chrome -->
+      <div id="chrome-owl" class="chrome">
+        <svg viewBox="0 0 282 282" xmlns="http://www.w3.org/2000/svg" style="fill-rule:evenodd;clip-rule:evenodd;">
+          <g transform="matrix(1,0,0,1,-63.8526,-63.9289)" fill="currentColor">
+            <path d="M319.647,124.062C306.079,118.257 285.68,115.158 266.935,118.233C238.228,122.925 218.226,137.601 204.579,157.311C193.656,141.539 178.62,128.986 158.366,122.286C153.322,120.615 147.923,119.115 142.062,118.234C123.455,115.423 103.044,118.06 89.439,124.063C89.385,123.597 89.962,123.116 90.329,122.608C101.878,106.707 116.222,93.378 133.626,83.194C151.752,72.599 172.565,65.331 199.799,64.059C214.817,63.362 228.926,65.549 240.422,68.601C264.314,74.948 282.86,86.116 298.81,100.226C306.343,106.899 313.503,114.895 319.329,123.333C319.449,123.509 319.828,123.761 319.647,124.062Z"/>
+            <path d="M123.581,146.85C136.056,146.255 147.034,149.149 155.853,153.58C164.324,157.843 171.448,164.065 176.853,171.508C182.36,179.095 186.31,187.978 188.041,199.313C188.925,205.09 188.931,211.283 188.931,217.884L188.931,276.356C188.931,279.561 188.45,283.197 189.183,285.674C189.869,288.037 191.54,289.81 194.69,289.888C200.713,290.059 207.218,290.014 214.072,289.966C217.18,289.948 219.11,288.517 219.904,285.998C220.649,283.635 220.241,279.836 220.241,276.602C220.241,257.141 220.012,237.729 220.319,218.28C220.421,211.468 220.169,205.478 221.04,199.64C223.529,183.212 231.074,170.605 241.48,161.69C248.142,155.979 257.286,151.034 267.506,148.716C272.718,147.538 278.82,146.796 285.187,147.093C291.452,147.388 296.826,148.223 301.966,149.762C311.873,152.75 320.104,157.598 326.62,164.124C336.378,173.881 343.472,186.29 345.023,204.091C345.545,210.004 344.962,216.337 344.217,222.262C342.768,233.775 340.002,244.166 336.594,253.578C329.746,272.494 319.219,287.987 306.678,301.568C294.366,314.902 278.747,325.977 260.94,333.756C251.953,337.694 242.134,340.91 231.181,342.996C220.167,345.112 207.752,346.122 195.176,345.287C171.242,343.682 151.632,336.714 135.255,327.287C118.849,317.824 105.051,305.878 93.49,291.101C79.163,272.819 68.523,250.761 64.867,222.262C64.116,216.428 63.532,210.16 64.049,204.091C65.053,192.425 68.715,182.665 73.704,174.825C83.536,159.37 99.744,147.983 123.581,146.85ZM102.25,159.096C96.154,162.003 90.99,166.058 86.679,170.693C82.23,175.482 78.695,180.604 75.978,187.151C73.345,193.482 71.602,201.573 71.992,210.27C72.773,227.179 79.958,238.52 89.108,247.48C93.617,251.899 99.13,255.539 105.563,258.182C112.062,260.86 119.956,262.589 128.769,262.246C137.114,261.903 144.334,259.661 150.334,256.643C156.406,253.595 161.702,249.813 165.989,245.13C174.622,235.703 181.151,223.433 180.658,205.557C180.436,197.468 178.049,189.899 175.151,183.905C172.133,177.68 168.412,172.771 163.56,168.346C154.428,160.032 141.719,152.733 123.887,153.581C115.32,153.989 108.383,156.171 102.25,159.096ZM243.175,170.693C238.618,175.338 235.167,180.532 232.474,187.151C229.967,193.319 228.032,201.411 228.422,210.27C228.789,218.618 230.965,225.757 234.013,231.832C237.098,237.946 240.795,243.08 245.533,247.48C254.545,255.849 267.416,262.943 285.187,262.246C293.549,261.903 300.757,259.661 306.835,256.721C312.926,253.799 318.107,249.753 322.406,245.13C326.728,240.465 330.42,235.153 333.107,228.676C335.753,222.297 337.556,214.512 337.171,205.557C336.81,197.384 334.64,189.869 331.646,183.905C325.682,172.037 316.322,162.896 303.6,157.639C297.204,154.994 289.1,153.166 280.401,153.581C263.208,154.404 252.074,161.618 243.175,170.693Z"/>
+            <path d="M125.36,184.881C132.61,184.493 138.376,187.661 142.139,191.127C145.98,194.65 149.137,200.034 149.353,206.933C149.593,214.454 146.81,219.765 143.119,223.718C139.464,227.647 133.89,230.665 127.302,230.944C119.986,231.254 114.262,228.362 110.517,224.707C106.555,220.817 103.699,215.996 103.303,208.884C102.888,201.646 105.924,195.958 109.471,192.183C113.156,188.254 117.978,185.278 125.36,184.881Z"/>
+            <path d="M281.869,184.881C288.915,184.505 295.107,187.58 298.654,191.127C302.424,194.899 305.544,199.893 305.862,206.933C306.205,214.4 303.193,219.789 299.616,223.718C296.039,227.662 290.34,230.665 283.81,230.944C276.343,231.254 270.975,228.323 267.025,224.707C263.087,221.097 260.04,215.713 259.733,208.962C259.39,201.588 262.372,195.85 265.967,192.183C269.796,188.275 274.311,185.287 281.869,184.881Z"/>
+          </g>
+        </svg>
+      </div>
+      <div id="chrome-tag" class="chrome">HackDiabetes 26 &nbsp;·&nbsp; Vancouver &nbsp;·&nbsp; <b>Nov 14–16</b></div>
+      <div id="progress"><div id="progress-fill"></div></div>
+
+      <!-- section-turn wipe -->
+      <div id="wipe" class="chrome" aria-hidden="true"><span id="wipe-label">Since then →</span></div>
+
+      <!-- ── BEAT 1 ── -->
+      <div id="b1" class="beat clip" data-start="0" data-duration="2.6" data-track-index="1" style="align-items:center; text-align:center;">
+        <div id="b1-owl" style="width:300px; height:300px; color:var(--green); margin:0 auto 46px;">
+          <svg viewBox="0 0 282 282" xmlns="http://www.w3.org/2000/svg" style="fill-rule:evenodd;clip-rule:evenodd; width:100%; height:100%; display:block;">
+            <g transform="matrix(1,0,0,1,-63.8526,-63.9289)" fill="currentColor">
+              <path d="M319.647,124.062C306.079,118.257 285.68,115.158 266.935,118.233C238.228,122.925 218.226,137.601 204.579,157.311C193.656,141.539 178.62,128.986 158.366,122.286C153.322,120.615 147.923,119.115 142.062,118.234C123.455,115.423 103.044,118.06 89.439,124.063C89.385,123.597 89.962,123.116 90.329,122.608C101.878,106.707 116.222,93.378 133.626,83.194C151.752,72.599 172.565,65.331 199.799,64.059C214.817,63.362 228.926,65.549 240.422,68.601C264.314,74.948 282.86,86.116 298.81,100.226C306.343,106.899 313.503,114.895 319.329,123.333C319.449,123.509 319.828,123.761 319.647,124.062Z"/>
+              <path d="M123.581,146.85C136.056,146.255 147.034,149.149 155.853,153.58C164.324,157.843 171.448,164.065 176.853,171.508C182.36,179.095 186.31,187.978 188.041,199.313C188.925,205.09 188.931,211.283 188.931,217.884L188.931,276.356C188.931,279.561 188.45,283.197 189.183,285.674C189.869,288.037 191.54,289.81 194.69,289.888C200.713,290.059 207.218,290.014 214.072,289.966C217.18,289.948 219.11,288.517 219.904,285.998C220.649,283.635 220.241,279.836 220.241,276.602C220.241,257.141 220.012,237.729 220.319,218.28C220.421,211.468 220.169,205.478 221.04,199.64C223.529,183.212 231.074,170.605 241.48,161.69C248.142,155.979 257.286,151.034 267.506,148.716C272.718,147.538 278.82,146.796 285.187,147.093C291.452,147.388 296.826,148.223 301.966,149.762C311.873,152.75 320.104,157.598 326.62,164.124C336.378,173.881 343.472,186.29 345.023,204.091C345.545,210.004 344.962,216.337 344.217,222.262C342.768,233.775 340.002,244.166 336.594,253.578C329.746,272.494 319.219,287.987 306.678,301.568C294.366,314.902 278.747,325.977 260.94,333.756C251.953,337.694 242.134,340.91 231.181,342.996C220.167,345.112 207.752,346.122 195.176,345.287C171.242,343.682 151.632,336.714 135.255,327.287C118.849,317.824 105.051,305.878 93.49,291.101C79.163,272.819 68.523,250.761 64.867,222.262C64.116,216.428 63.532,210.16 64.049,204.091C65.053,192.425 68.715,182.665 73.704,174.825C83.536,159.37 99.744,147.983 123.581,146.85ZM102.25,159.096C96.154,162.003 90.99,166.058 86.679,170.693C82.23,175.482 78.695,180.604 75.978,187.151C73.345,193.482 71.602,201.573 71.992,210.27C72.773,227.179 79.958,238.52 89.108,247.48C93.617,251.899 99.13,255.539 105.563,258.182C112.062,260.86 119.956,262.589 128.769,262.246C137.114,261.903 144.334,259.661 150.334,256.643C156.406,253.595 161.702,249.813 165.989,245.13C174.622,235.703 181.151,223.433 180.658,205.557C180.436,197.468 178.049,189.899 175.151,183.905C172.133,177.68 168.412,172.771 163.56,168.346C154.428,160.032 141.719,152.733 123.887,153.581C115.32,153.989 108.383,156.171 102.25,159.096ZM243.175,170.693C238.618,175.338 235.167,180.532 232.474,187.151C229.967,193.319 228.032,201.411 228.422,210.27C228.789,218.618 230.965,225.757 234.013,231.832C237.098,237.946 240.795,243.08 245.533,247.48C254.545,255.849 267.416,262.943 285.187,262.246C293.549,261.903 300.757,259.661 306.835,256.721C312.926,253.799 318.107,249.753 322.406,245.13C326.728,240.465 330.42,235.153 333.107,228.676C335.753,222.297 337.556,214.512 337.171,205.557C336.81,197.384 334.64,189.869 331.646,183.905C325.682,172.037 316.322,162.896 303.6,157.639C297.204,154.994 289.1,153.166 280.401,153.581C263.208,154.404 252.074,161.618 243.175,170.693Z"/>
+              <path d="M125.36,184.881C132.61,184.493 138.376,187.661 142.139,191.127C145.98,194.65 149.137,200.034 149.353,206.933C149.593,214.454 146.81,219.765 143.119,223.718C139.464,227.647 133.89,230.665 127.302,230.944C119.986,231.254 114.262,228.362 110.517,224.707C106.555,220.817 103.699,215.996 103.303,208.884C102.888,201.646 105.924,195.958 109.471,192.183C113.156,188.254 117.978,185.278 125.36,184.881Z"/>
+              <path d="M281.869,184.881C288.915,184.505 295.107,187.58 298.654,191.127C302.424,194.899 305.544,199.893 305.862,206.933C306.205,214.4 303.193,219.789 299.616,223.718C296.039,227.662 290.34,230.665 283.81,230.944C276.343,231.254 270.975,228.323 267.025,224.707C263.087,221.097 260.04,215.713 259.733,208.962C259.39,201.588 262.372,195.85 265.967,192.183C269.796,188.275 274.311,185.287 281.869,184.881Z"/>
+            </g>
+          </svg>
+        </div>
+        <div id="b1-word" class="statement" style="font-size:150px;">One weekend.</div>
+      </div>
+
+      <!-- ── BEAT 2 ── -->
+      <div id="b2" class="beat clip" data-start="2.6" data-duration="2.6" data-track-index="1">
+        <div class="photo-wrap">
+          <img id="photo-ballroom" src="assets/IMG_9706.png" alt="HackDiabetes attendees" />
+          <div class="photo-scrim"></div>
+        </div>
+        <div id="b2-eye" class="eyebrow">The 2025 hackathon</div>
+        <div id="b2-word" class="statement" style="font-size:110px;">A room full of people who <span class="g">refuse to wait.</span></div>
+      </div>
+
+      <!-- ── BEAT 3 ── -->
+      <div id="b3" class="beat clip" data-start="5.2" data-duration="2.4" data-track-index="1">
+        <div id="b3-eye" class="eyebrow"><span class="idx">// built here</span> &nbsp; 01 / 03</div>
+        <div id="b3-name" class="device-name"><span class="ln">Tandem</span><span class="ln">Mobi.</span></div>
+        <div><span id="b3-do" class="device-do">driver developed</span></div>
+        <div class="stamprow">
+          <div id="b3-stamp" class="stamp"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5 11-11.5" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div id="b3-slabel" class="stamp-label">Done</div>
+        </div>
+      </div>
+
+      <!-- ── BEAT 4 ── -->
+      <div id="b4" class="beat clip" data-start="7.6" data-duration="2.4" data-track-index="1">
+        <div id="b4-eye" class="eyebrow"><span class="idx">// built here</span> &nbsp; 02 / 03</div>
+        <div id="b4-name" class="device-name">AAPS.</div>
+        <div><span id="b4-do" class="device-do">build it right in your browser</span></div>
+        <div class="stamprow">
+          <div id="b4-stamp" class="stamp"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5 11-11.5" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div id="b4-slabel" class="stamp-label">Done</div>
+        </div>
+      </div>
+
+      <!-- ── BEAT 5 ── -->
+      <div id="b5" class="beat clip" data-start="10.0" data-duration="2.4" data-track-index="1">
+        <div id="b5-eye" class="eyebrow"><span class="idx">// built here</span> &nbsp; 03 / 03</div>
+        <div id="b5-name" class="device-name"><span class="ln">LoopFollow</span><span class="ln" style="color:var(--muted); font-size:88px;">→ AAPS</span></div>
+        <div><span id="b5-do" class="device-do">remote commands</span></div>
+        <div class="stamprow">
+          <div id="b5-stamp" class="stamp"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5 11-11.5" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div id="b5-slabel" class="stamp-label">Done</div>
+        </div>
+      </div>
+
+      <!-- ── BEAT 6 ── -->
+      <div id="b6" class="beat clip" data-start="12.4" data-duration="2.4" data-track-index="1" style="align-items:flex-start;">
+        <div id="b6-word" class="statement" style="font-size:118px;"><span class="ln">And the community</span><span class="ln uline" id="b6-ul">hasn't stopped.<i class="ul-bar" id="b6-bar"></i></span></div>
+      </div>
+
+      <!-- ── BEAT 7 ── -->
+      <div id="b7" class="beat clip" data-start="14.8" data-duration="2.2" data-track-index="1">
+        <div id="b7-eye" class="eyebrow"><span class="idx" style="color:var(--orange);">// since then</span></div>
+        <div id="b7-name" class="device-name">Nocturne.</div>
+        <div><span id="b7-do" class="device-do">open alpha</span></div>
+        <div id="b7-sub" style="font-family:'JetBrains Mono',monospace; font-weight:700; font-size:34px; letter-spacing:.04em; color:var(--muted); margin-top:22px;">the next-gen Nightscout</div>
+      </div>
+
+      <!-- ── BEAT 8 ── -->
+      <div id="b8" class="beat clip" data-start="17.0" data-duration="2.4" data-track-index="1">
+        <div id="b8-eye" class="eyebrow"><span class="idx" style="color:var(--orange);">// since then</span></div>
+        <div id="b8-name" class="device-name">Omnipod 5.</div>
+        <div><span id="b8-do" class="device-do">support added</span></div>
+        <div class="stamprow">
+          <div id="b8-stamp" class="stamp"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5 11-11.5" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div id="b8-slabel" class="stamp-label">Done</div>
+        </div>
+      </div>
+
+      <!-- ── BEAT 9 ── -->
+      <div id="b9" class="beat clip" data-start="19.4" data-duration="3.4" data-track-index="2" style="align-items:flex-start; z-index:20;">
+        <div id="b9-l1" class="kline">Open source.</div>
+        <div id="b9-l2" class="kline" style="color:var(--green);">Free.</div>
+        <div id="b9-l3" class="kline">Built by <span class="o">us.</span></div>
+      </div>
+
+      <!-- ── BEAT 10 (CTA) ── -->
+      <div id="b10" class="beat clip" data-start="22.4" data-duration="7.6" data-track-index="1">
+        <div id="cta-head"><span class="ln">This is what your</span><span class="ln"><span class="o">donation</span> builds.</span></div>
+        <img id="cta-molecule" src="assets/hackdiabetes-logo.png" alt="HackDiabetes" />
+        <div id="cta-event">Vancouver · Nov 14–16, 2026</div>
+        <div id="cta-btn">
+          <span class="lbl">Donate</span>
+          <span class="sub">donate.hackdiabetes.io</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const DUR = 30;
+
+      /* ── persistent: progress fill + faint bg drift ── */
+      tl.fromTo("#progress-fill", { scaleX: 0 }, { scaleX: 1, duration: DUR, ease: "none" }, 0);
+      tl.fromTo("#bg-blob", { rotation: -4, scale: 1.0 }, { rotation: 4, scale: 1.08, duration: DUR, ease: "sine.inOut" }, 0);
+
+      /* ── TRANSITION: section-turn wipe (built-here → since-then), masks the 6→7 cut ── */
+      tl.fromTo("#wipe", { x: "-110%" }, { x: "0%", duration: 0.26, ease: "power3.in" }, 14.52);
+      tl.to("#wipe", { x: "112%", duration: 0.30, ease: "power3.out" }, 14.8);
+
+      /* ── BEAT 1 ── */
+      tl.fromTo("#b1-owl", { scale: 0.5, opacity: 0, filter: "blur(14px)" }, { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.55, ease: "back.out(2)" }, 0.1);
+      tl.to("#b1-owl", { opacity: 0.35, duration: 0.06, yoyo: true, repeat: 3, ease: "none" }, 0.7);
+      tl.fromTo("#b1-word", { scale: 1.5, opacity: 0, filter: "blur(16px)" }, { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.55, ease: "power4.out" }, 0.55);
+
+      /* ── BEAT 2 ── */
+      tl.fromTo("#photo-ballroom", { scale: 1.14 }, { scale: 1.0, duration: 2.6, ease: "sine.out" }, 2.6);
+      tl.fromTo("#b2-eye", { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, 2.75);
+      tl.fromTo("#b2-word", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "expo.out" }, 2.9);
+
+      /* ── receipt helper ── */
+      function receipt(n, start, entrance) {
+        const eye = `#b${n}-eye`, name = `#b${n}-name`, dodo = `#b${n}-do`;
+        tl.fromTo(eye, { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.32, ease: "power3.out" }, start);
+        tl.fromTo(name, entrance.from, Object.assign({ duration: 0.5, ease: entrance.ease }, entrance.to), start + 0.1);
+        tl.fromTo(dodo, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.32, ease: "power2.out" }, start + 0.5);
+        const stamp = `#b${n}-stamp`, slabel = `#b${n}-slabel`;
+        if (document.querySelector(stamp)) {
+          tl.fromTo(stamp, { scale: 0, rotation: -35, opacity: 0 }, { scale: 1, rotation: 0, opacity: 1, duration: 0.5, ease: "back.out(2.4)" }, start + 0.78);
+          tl.fromTo(slabel, { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.28, ease: "power2.out" }, start + 0.98);
+        }
+      }
+      /* BEAT 3 — scale+blur slam */
+      receipt(3, 5.2, { from: { scale: 1.4, opacity: 0, filter: "blur(14px)" }, to: { scale: 1, opacity: 1, filter: "blur(0px)" }, ease: "power4.out" });
+      /* BEAT 4 — side snap */
+      receipt(4, 7.6, { from: { x: -360, opacity: 0 }, to: { x: 0, opacity: 1 }, ease: "expo.out" });
+      /* BEAT 5 — rise + rotate */
+      receipt(5, 10.0, { from: { y: 110, rotation: 5, opacity: 0 }, to: { y: 0, rotation: 0, opacity: 1 }, ease: "circ.out" });
+
+      /* ── BEAT 6 ── */
+      tl.fromTo("#b6-word", { y: 70, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power4.out" }, 12.5);
+      tl.fromTo("#b6-bar", { scaleX: 0 }, { scaleX: 1, duration: 0.5, ease: "power3.inOut" }, 13.05);
+
+      /* ── momentum beats (faster) ── */
+      receipt(7, 14.8, { from: { scale: 1.35, opacity: 0, filter: "blur(12px)" }, to: { scale: 1, opacity: 1, filter: "blur(0px)" }, ease: "power4.out" });
+      tl.fromTo("#b7-sub", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, 15.3);
+      receipt(8, 17.0, { from: { x: 340, opacity: 0 }, to: { x: 0, opacity: 1 }, ease: "expo.out" });
+
+      /* ── BEAT 9 ── */
+      tl.fromTo("#b9-l1", { x: -60, opacity: 0, filter: "blur(10px)" }, { x: 0, opacity: 1, filter: "blur(0px)", duration: 0.4, ease: "power4.out" }, 19.5);
+      tl.fromTo("#b9-l2", { scale: 1.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.8)" }, 20.0);
+      tl.fromTo("#b9-l3", { y: 80, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: "circ.out" }, 20.5);
+
+      /* ── TRANSITION: zoom-through into CTA — b9 scales up + blurs out while b10 emerges ── */
+      tl.to("#b9", { scale: 1.5, filter: "blur(18px)", opacity: 0, duration: 0.42, ease: "power2.in" }, 22.4);
+
+      /* ── BEAT 10 CTA ── */
+      tl.fromTo("#b10", { scale: 0.85 }, { scale: 1, duration: 0.55, ease: "power3.out" }, 22.4);
+      tl.fromTo("#cta-head", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power4.out" }, 22.6);
+      tl.fromTo("#cta-molecule", { scale: 0.4, opacity: 0, rotation: -8 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.6, ease: "back.out(1.9)" }, 23.0);
+      tl.fromTo("#cta-event", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, 23.4);
+      tl.fromTo("#cta-btn", { scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(2.2)" }, 23.7);
+      // finite CTA pulse
+      const pStart = 24.6, cyc = 1.4, pulses = Math.max(0, Math.floor((DUR - pStart) / cyc) - 1);
+      tl.to("#cta-btn", { scale: 1.045, duration: cyc / 2, ease: "sine.inOut", yoyo: true, repeat: pulses }, pStart);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

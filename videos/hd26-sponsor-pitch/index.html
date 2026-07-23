@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1080px; overflow: hidden; background: #0b0f16; }
+      body { font-family: "Inter", sans-serif; }
+
+      :root {
+        --dark: #0b0f16; --dark2: #121826; --card: #0f1a2b;
+        --green: #27c55e; --orange: #f05a3e; --navy: #2f6ea6; --navy-deep: #16456e;
+        --white: #ffffff; --muted: rgba(255,255,255,.55); --faint: rgba(255,255,255,.34);
+        --hair: rgba(255,255,255,.10);
+      }
+
+      #root { position: relative; width: 1080px; height: 1080px; overflow: hidden; }
+
+      #bg { position: absolute; inset: 0;
+        background:
+          radial-gradient(90% 70% at 50% 0%, #16233a 0%, #0b0f16 62%),
+          linear-gradient(180deg, #0b0f16 0%, #0c1119 100%); }
+      #bg-blob { position: absolute; left: 50%; top: 52%; width: 1180px; transform: translate(-50%,-50%); opacity: 0.05; }
+      #bg-grid { position: absolute; inset: 0; opacity: 0.5;
+        background-image: linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+        background-size: 88px 88px;
+        -webkit-mask-image: radial-gradient(75% 60% at 50% 45%, #000 30%, transparent 82%);
+        mask-image: radial-gradient(75% 60% at 50% 45%, #000 30%, transparent 82%); }
+
+      /* chrome */
+      .chrome { position: absolute; z-index: 40; }
+      #chrome-owl { top: 60px; left: 60px; width: 60px; height: 60px; color: rgba(255,255,255,.3); }
+      #chrome-owl svg { width: 100%; height: 100%; display: block; }
+      #chrome-foundation { top: 66px; right: 60px; font-family: "JetBrains Mono", monospace; font-weight: 700;
+        font-size: 21px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+      #chrome-tag { bottom: 74px; left: 50%; transform: translateX(-50%); font-family: "JetBrains Mono", monospace;
+        font-weight: 700; font-size: 23px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); white-space: nowrap; }
+      #chrome-tag b { color: var(--orange); }
+      #progress { position: absolute; left: 0; bottom: 0; width: 1080px; height: 6px; background: rgba(255,255,255,.06); z-index: 40; }
+      #progress-fill { position: absolute; left: 0; top: 0; height: 100%; width: 100%; background: var(--navy); transform: scaleX(0); transform-origin: left center; }
+
+      /* beats */
+      .beat { position: absolute; inset: 0; z-index: 10; }
+      .inner { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 0 96px; }
+      .eyebrow { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 27px; letter-spacing: 0.18em;
+        text-transform: uppercase; color: var(--faint); margin-bottom: 40px; }
+      .eyebrow .a { color: var(--orange); }
+
+      /* beat 1 stats */
+      .statrow { display: flex; align-items: baseline; gap: 26px; margin-bottom: 14px; }
+      .statnum { font-family: "Inter", sans-serif; font-weight: 900; font-size: 190px; line-height: 0.86; letter-spacing: -0.04em; }
+      .statnum.g { color: var(--green); } .statnum.w { color: var(--white); } .statnum.o { color: var(--orange); }
+      .statlbl { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 40px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+      /* headings */
+      .h1 { font-family: "Inter", sans-serif; font-weight: 900; font-size: 96px; line-height: 0.98; letter-spacing: -0.03em; color: var(--white); }
+      .h1 .g { color: var(--green); } .h1 .o { color: var(--orange); }
+      .ln { display: block; }
+
+      /* beat 2 photo */
+      .photo { position: absolute; inset: 0; overflow: hidden; }
+      .photo img { width: 100%; height: 100%; object-fit: cover; }
+      .photo-scrim { position: absolute; inset: 0;
+        background: linear-gradient(180deg, rgba(11,15,22,.35) 0%, rgba(11,15,22,.62) 46%, rgba(11,15,22,.96) 90%); }
+      .roles { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 27px; letter-spacing: 0.08em;
+        text-transform: uppercase; color: var(--green); margin-top: 26px; line-height: 1.9; }
+      .roles span { opacity: 0; display: inline-block; }
+
+      /* beat 3 receipts list */
+      .rlist { display: flex; flex-direction: column; gap: 30px; margin-top: 6px; }
+      .ritem { display: flex; align-items: center; gap: 26px; opacity: 0; }
+      .rcheck { width: 60px; height: 60px; border-radius: 50%; background: var(--green); flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 7px rgba(39,197,94,.12); }
+      .rcheck svg { width: 32px; height: 32px; }
+      .rtext { font-family: "Inter", sans-serif; font-weight: 800; font-size: 54px; letter-spacing: -0.02em; color: var(--white); }
+      .rtext b { color: var(--white); } .rtext span { color: var(--muted); font-weight: 700; }
+      .rmomentum { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 33px; letter-spacing: 0.04em;
+        color: var(--orange); margin-top: 40px; opacity: 0; }
+
+      /* beat 4 value cards */
+      .vcards { display: flex; flex-direction: column; gap: 22px; margin-top: 4px; }
+      .vcard { display: flex; align-items: center; gap: 30px; background: var(--card); border: 1.5px solid rgba(255,255,255,.08);
+        border-left: 4px solid var(--orange); border-radius: 14px; padding: 30px 34px; opacity: 0; }
+      .vidx { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 34px; color: var(--orange); letter-spacing: 0.05em; }
+      .vbody .vt { font-family: "Inter", sans-serif; font-weight: 900; font-size: 48px; letter-spacing: -0.02em; color: var(--white); line-height: 1.05; }
+      .vbody .vs { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 27px; letter-spacing: 0.03em; color: var(--muted); margin-top: 8px; }
+
+      /* beat 5 */
+      .tailored { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 34px; letter-spacing: 0.05em;
+        color: var(--green); margin-top: 38px; opacity: 0; }
+
+      /* beat 6 CTA */
+      #b6 .inner { align-items: center; text-align: center; padding: 0 84px; }
+      #cta-molecule { width: 340px; margin: 0 auto 30px; display: block; }
+      #cta-head { font-family: "Inter", sans-serif; font-weight: 900; font-size: 84px; line-height: 1.0; letter-spacing: -0.03em; color: var(--white); margin-bottom: 26px; }
+      #cta-head .o { color: var(--orange); }
+      #cta-btn { display: inline-flex; align-items: center; gap: 18px; background: var(--orange); color: #fff; border-radius: 16px;
+        padding: 30px 52px; box-shadow: 0 20px 60px rgba(240,90,62,.4); }
+      #cta-btn .lbl { font-family: "Inter", sans-serif; font-weight: 900; font-size: 46px; letter-spacing: -0.01em; }
+      #cta-btn .sub { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 27px; letter-spacing: 0.04em; opacity: .92; }
+      #cta-mail { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 28px; letter-spacing: 0.06em; color: var(--muted); margin-top: 30px; }
+      #cta-urgency { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 22px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin-top: 16px; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="56" data-width="1080" data-height="1080">
+      <!-- single mixed audio track: continuous VO (Derya) + quiet music bed -->
+      <audio id="track" src="assets/final-audio.mp3" data-start="0" data-duration="56" data-track-index="9" data-volume="1"></audio>
+
+      <div id="bg">
+        <img id="bg-blob" src="assets/blob.svg" alt="" />
+        <div id="bg-grid"></div>
+      </div>
+
+      <div id="chrome-owl" class="chrome">
+        <svg viewBox="0 0 282 282" xmlns="http://www.w3.org/2000/svg" style="fill-rule:evenodd;clip-rule:evenodd;">
+          <g transform="matrix(1,0,0,1,-63.8526,-63.9289)" fill="currentColor">
+            <path d="M319.647,124.062C306.079,118.257 285.68,115.158 266.935,118.233C238.228,122.925 218.226,137.601 204.579,157.311C193.656,141.539 178.62,128.986 158.366,122.286C153.322,120.615 147.923,119.115 142.062,118.234C123.455,115.423 103.044,118.06 89.439,124.063C89.385,123.597 89.962,123.116 90.329,122.608C101.878,106.707 116.222,93.378 133.626,83.194C151.752,72.599 172.565,65.331 199.799,64.059C214.817,63.362 228.926,65.549 240.422,68.601C264.314,74.948 282.86,86.116 298.81,100.226C306.343,106.899 313.503,114.895 319.329,123.333C319.449,123.509 319.828,123.761 319.647,124.062Z"/>
+            <path d="M123.581,146.85C136.056,146.255 147.034,149.149 155.853,153.58C164.324,157.843 171.448,164.065 176.853,171.508C182.36,179.095 186.31,187.978 188.041,199.313C188.925,205.09 188.931,211.283 188.931,217.884L188.931,276.356C188.931,279.561 188.45,283.197 189.183,285.674C189.869,288.037 191.54,289.81 194.69,289.888C200.713,290.059 207.218,290.014 214.072,289.966C217.18,289.948 219.11,288.517 219.904,285.998C220.649,283.635 220.241,279.836 220.241,276.602C220.241,257.141 220.012,237.729 220.319,218.28C220.421,211.468 220.169,205.478 221.04,199.64C223.529,183.212 231.074,170.605 241.48,161.69C248.142,155.979 257.286,151.034 267.506,148.716C272.718,147.538 278.82,146.796 285.187,147.093C291.452,147.388 296.826,148.223 301.966,149.762C311.873,152.75 320.104,157.598 326.62,164.124C336.378,173.881 343.472,186.29 345.023,204.091C345.545,210.004 344.962,216.337 344.217,222.262C342.768,233.775 340.002,244.166 336.594,253.578C329.746,272.494 319.219,287.987 306.678,301.568C294.366,314.902 278.747,325.977 260.94,333.756C251.953,337.694 242.134,340.91 231.181,342.996C220.167,345.112 207.752,346.122 195.176,345.287C171.242,343.682 151.632,336.714 135.255,327.287C118.849,317.824 105.051,305.878 93.49,291.101C79.163,272.819 68.523,250.761 64.867,222.262C64.116,216.428 63.532,210.16 64.049,204.091C65.053,192.425 68.715,182.665 73.704,174.825C83.536,159.37 99.744,147.983 123.581,146.85ZM102.25,159.096C96.154,162.003 90.99,166.058 86.679,170.693C82.23,175.482 78.695,180.604 75.978,187.151C73.345,193.482 71.602,201.573 71.992,210.27C72.773,227.179 79.958,238.52 89.108,247.48C93.617,251.899 99.13,255.539 105.563,258.182C112.062,260.86 119.956,262.589 128.769,262.246C137.114,261.903 144.334,259.661 150.334,256.643C156.406,253.595 161.702,249.813 165.989,245.13C174.622,235.703 181.151,223.433 180.658,205.557C180.436,197.468 178.049,189.899 175.151,183.905C172.133,177.68 168.412,172.771 163.56,168.346C154.428,160.032 141.719,152.733 123.887,153.581C115.32,153.989 108.383,156.171 102.25,159.096ZM243.175,170.693C238.618,175.338 235.167,180.532 232.474,187.151C229.967,193.319 228.032,201.411 228.422,210.27C228.789,218.618 230.965,225.757 234.013,231.832C237.098,237.946 240.795,243.08 245.533,247.48C254.545,255.849 267.416,262.943 285.187,262.246C293.549,261.903 300.757,259.661 306.835,256.721C312.926,253.799 318.107,249.753 322.406,245.13C326.728,240.465 330.42,235.153 333.107,228.676C335.753,222.297 337.556,214.512 337.171,205.557C336.81,197.384 334.64,189.869 331.646,183.905C325.682,172.037 316.322,162.896 303.6,157.639C297.204,154.994 289.1,153.166 280.401,153.581C263.208,154.404 252.074,161.618 243.175,170.693Z"/>
+            <path d="M125.36,184.881C132.61,184.493 138.376,187.661 142.139,191.127C145.98,194.65 149.137,200.034 149.353,206.933C149.593,214.454 146.81,219.765 143.119,223.718C139.464,227.647 133.89,230.665 127.302,230.944C119.986,231.254 114.262,228.362 110.517,224.707C106.555,220.817 103.699,215.996 103.303,208.884C102.888,201.646 105.924,195.958 109.471,192.183C113.156,188.254 117.978,185.278 125.36,184.881Z"/>
+            <path d="M281.869,184.881C288.915,184.505 295.107,187.58 298.654,191.127C302.424,194.899 305.544,199.893 305.862,206.933C306.205,214.4 303.193,219.789 299.616,223.718C296.039,227.662 290.34,230.665 283.81,230.944C276.343,231.254 270.975,228.323 267.025,224.707C263.087,221.097 260.04,215.713 259.733,208.962C259.39,201.588 262.372,195.85 265.967,192.183C269.796,188.275 274.311,185.287 281.869,184.881Z"/>
+          </g>
+        </svg>
+      </div>
+      <div id="chrome-foundation" class="chrome">A Nightscout Foundation event</div>
+      <div id="chrome-tag" class="chrome">HackDiabetes 26 &nbsp;·&nbsp; Vancouver &nbsp;·&nbsp; <b>Nov 14–16</b></div>
+      <div id="progress"><div id="progress-fill"></div></div>
+
+      <!-- BEAT 1 — hook -->
+      <div id="b1" class="beat clip" data-start="0" data-duration="4.86" data-track-index="1">
+        <div class="inner">
+          <div class="statrow"><div class="statnum g" id="s1a">75</div><div class="statlbl">people</div></div>
+          <div class="statrow"><div class="statnum w" id="s1b">72</div><div class="statlbl">hours</div></div>
+          <div class="statrow"><div class="statnum o" id="s1c">1</div><div class="statlbl">room</div></div>
+        </div>
+      </div>
+
+      <!-- BEAT 2 — who -->
+      <div id="b2" class="beat clip" data-start="4.86" data-duration="9.36" data-track-index="1">
+        <div class="photo" id="b2-photo1"><img src="assets/IMG_9706.png" alt="HackDiabetes participants" /></div>
+        <div class="photo" id="b2-photo2" style="opacity:0"><img src="assets/IMG_1191.png" alt="Building at HackDiabetes" /></div>
+        <div class="photo-scrim"></div>
+        <div class="inner" style="justify-content:flex-end; padding-bottom:150px;">
+          <div class="h1" id="b2-head"><span class="ln">The people who move</span><span class="ln">diabetes tech <span class="g">forward.</span></span></div>
+          <div class="roles" id="b2-roles"><span>Engineers</span> · <span>Clinicians</span> · <span>Data</span> · <span>Designers</span> · <span>People living with it</span></div>
+        </div>
+      </div>
+
+      <!-- BEAT 3 — proof -->
+      <div id="b3" class="beat clip" data-start="14.22" data-duration="12.32" data-track-index="1">
+        <div class="inner">
+          <div class="eyebrow" id="b3-eye"><span class="a">// one weekend</span> &nbsp; last year</div>
+          <div class="rlist">
+            <div class="ritem" id="r1"><div class="rcheck"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5 11-11.5" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="rtext"><b>Tandem Mobi</b> <span>— driver developed</span></div></div>
+            <div class="ritem" id="r2"><div class="rcheck"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5 11-11.5" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="rtext"><b>AAPS</b> <span>— built in the browser</span></div></div>
+            <div class="ritem" id="r3"><div class="rcheck"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5 11-11.5" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="rtext"><b>Remote commands</b> <span>— shipped</span></div></div>
+          </div>
+          <div class="rmomentum" id="r-mom">— and the momentum hasn't stopped since.</div>
+        </div>
+      </div>
+
+      <!-- BEAT 4 — value -->
+      <div id="b4" class="beat clip" data-start="26.54" data-duration="11.54" data-track-index="1">
+        <div class="inner">
+          <div class="eyebrow" id="b4-eye"><span class="a">// why sponsor</span></div>
+          <div class="vcards">
+            <div class="vcard" id="v1"><div class="vidx">01</div><div class="vbody"><div class="vt">Direct access</div><div class="vs">under 75 builders · real face time, not a booth crush</div></div></div>
+            <div class="vcard" id="v2"><div class="vidx">02</div><div class="vbody"><div class="vt">Hard-to-find talent</div><div class="vs">diabetes &amp; health-tech, already in the field</div></div></div>
+            <div class="vcard" id="v3"><div class="vidx">03</div><div class="vbody"><div class="vt">Measurable impact</div><div class="vs">tax-deductible · 501(c)(3) nonprofit</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BEAT 5 — intimacy / flexibility -->
+      <div id="b5" class="beat clip" data-start="38.08" data-duration="10.82" data-track-index="1">
+        <div class="inner">
+          <div class="h1" id="b5-head"><span class="ln">No booth crush.</span><span class="ln"><span class="g">Real conversations.</span></span></div>
+          <div class="tailored" id="b5-sub">From cloud credits to lead partner — we tailor it to you.</div>
+        </div>
+      </div>
+
+      <!-- BEAT 6 — CTA -->
+      <div id="b6" class="beat clip" data-start="48.9" data-duration="7.1" data-track-index="1">
+        <div class="inner">
+          <img id="cta-molecule" src="assets/hackdiabetes-logo.png" alt="HackDiabetes" />
+          <div id="cta-head"><span class="ln">Let's build something</span><span class="ln o">worth sponsoring.</span></div>
+          <div id="cta-btn"><span class="lbl">Become a sponsor</span><span class="sub">hackdiabetes.io/sponsorship</span></div>
+          <div id="cta-mail">sponsorships@nightscoutfoundation.org</div>
+          <div id="cta-urgency">Commit by Oct 1 for logo placement</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const DUR = 56;
+      const T = { b1: 0, b2: 4.86, b3: 14.22, b4: 26.54, b5: 38.08, b6: 48.9 };
+
+      /* persistent progress + bg drift */
+      tl.fromTo("#progress-fill", { scaleX: 0 }, { scaleX: 1, duration: DUR, ease: "none" }, 0);
+      tl.fromTo("#bg-blob", { rotation: -4, scale: 1.0 }, { rotation: 4, scale: 1.07, duration: DUR, ease: "sine.inOut" }, 0);
+
+      /* helper: fade a beat's inner content in at start, out just before its window ends */
+      function beatFade(sel, start, dur) {
+        tl.fromTo(sel, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, ease: "power2.out" }, start);
+        tl.to(sel, { autoAlpha: 0, duration: 0.35, ease: "power2.in" }, start + dur - 0.35);
+        tl.set(sel, { autoAlpha: 0 }, start + dur); // hard kill at clip boundary (seek-safe)
+      }
+
+      /* BEAT 1 — stats rise in */
+      beatFade("#b1 .inner", T.b1, 4.86);
+      tl.fromTo("#s1a", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power4.out" }, T.b1 + 0.2);
+      tl.fromTo("#s1b", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power4.out" }, T.b1 + 0.55);
+      tl.fromTo("#s1c", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power4.out" }, T.b1 + 0.9);
+
+      /* BEAT 2 — photo + head + roles; crossfade photo1→photo2 */
+      beatFade("#b2 .inner", T.b2, 9.36);
+      tl.fromTo("#b2-photo1 img", { scale: 1.12 }, { scale: 1.0, duration: 9.36, ease: "sine.out" }, T.b2);
+      tl.fromTo("#b2-photo2 img", { scale: 1.12 }, { scale: 1.0, duration: 6.0, ease: "sine.out" }, T.b2 + 5.0);
+      tl.to("#b2-photo2", { opacity: 1, duration: 1.2, ease: "power1.inOut" }, T.b2 + 5.2);
+      tl.fromTo("#b2-head", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, T.b2 + 0.5);
+      gsap.utils.toArray("#b2-roles span").forEach((el, i) => {
+        tl.to(el, { opacity: 1, duration: 0.3, ease: "power2.out" }, T.b2 + 1.6 + i * 0.85);
+      });
+
+      /* BEAT 3 — receipts accumulate, synced to VO mentions */
+      beatFade("#b3 .inner", T.b3, 12.32);
+      tl.fromTo("#b3-eye", { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, T.b3 + 0.3);
+      const rItems = ["#r1", "#r2", "#r3"];
+      const rTimes = [3.15, 5.2, 7.5]; // synced to "Tandem Mobi" / "AAPS" / "remote commands"
+      rItems.forEach((id, i) => {
+        tl.fromTo(id, { x: -40, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.5, ease: "power3.out" }, T.b3 + rTimes[i]);
+        tl.fromTo(id + " .rcheck", { scale: 0, rotation: -30 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2.2)" }, T.b3 + rTimes[i] + 0.15);
+      });
+      tl.fromTo("#r-mom", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, T.b3 + 9.0);
+
+      /* BEAT 4 — value cards stagger with VO */
+      beatFade("#b4 .inner", T.b4, 11.54);
+      tl.fromTo("#b4-eye", { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, T.b4 + 0.3);
+      const vCards = ["#v1", "#v2", "#v3"];
+      const vTimes = [2.6, 5.4, 8.2]; // synced to "Direct access" / "Your brand" / "Real impact"
+      vCards.forEach((id, i) => {
+        tl.fromTo(id, { x: 44, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.55, ease: "power3.out" }, T.b4 + vTimes[i]);
+      });
+
+      /* BEAT 5 — statement + tailored line */
+      beatFade("#b5 .inner", T.b5, 10.82);
+      tl.fromTo("#b5-head", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power4.out" }, T.b5 + 1.3);
+      tl.fromTo("#b5-sub", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, T.b5 + 6.2);
+
+      /* BEAT 6 — CTA (holds to end, no fade-out) */
+      tl.fromTo("#b6 .inner", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, ease: "power2.out" }, T.b6);
+      tl.fromTo("#cta-molecule", { scale: 0.5, opacity: 0, rotation: -8 }, { scale: 1, opacity: 1, rotation: 0, duration: 0.7, ease: "back.out(1.8)" }, T.b6 + 0.2);
+      tl.fromTo("#cta-head", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.55, ease: "power4.out" }, T.b6 + 0.7);
+      tl.fromTo("#cta-btn", { scale: 0.75, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.55, ease: "back.out(2)" }, T.b6 + 1.2);
+      tl.fromTo("#cta-mail", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }, T.b6 + 1.7);
+      tl.fromTo("#cta-urgency", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, T.b6 + 2.1);
+      const pS = T.b6 + 2.6, cyc = 1.4, pulses = Math.max(0, Math.floor((DUR - pS) / cyc) - 1);
+      tl.to("#cta-btn", { scale: 1.04, duration: cyc / 2, ease: "sine.inOut", yoyo: true, repeat: pulses }, pS);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

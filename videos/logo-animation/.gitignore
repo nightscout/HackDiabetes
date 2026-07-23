@@ -1,0 +1,6 @@
+# Rendered output — all of it is reproducible from the SVGs via render/render-anim.mjs,
+# so none of it is tracked (no frame sequences, no large ProRes masters, no format zoo).
+# Regenerate what you need:  cd render && node render-anim.mjs --in ../NS-endcard.svg --out ../out/NSF-endcard
+out/
+
+# The animated SVGs + preview_*.gif ARE tracked — they show the result and rebuild everything.
