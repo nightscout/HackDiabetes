@@ -26,9 +26,9 @@ by proving what the community built at/around the 2025 event. Shareable social c
 2. A room full of people who refuse to wait.  (ballroom photo)
 3. Tandem Mobi — driver developed.  ✓
 4. AAPS — build it right in your browser.  ✓
-5. LoopFollow → AAPS — remote commands.  ✓
+5. Nocturne — proof of concept established.  (was LoopFollow→AAPS)  ✓
 6. And the community hasn't stopped.
-7. Nocturne — open alpha.
+7. Nocturne → now in open alpha.
 8. Omnipod 5 — support added.
 9. Open source. Free. Built by us.
 10. This is what your donation builds. → HackDiabetes 26 · Vancouver · Nov 14–16

@@ -10,7 +10,7 @@ Once a year, seventy-five people spend seventy-two hours in one room.
 Not a conference crowd. The people who actually move diabetes technology forward. Engineers, clinicians, and the people living with it.
 
 **S3 (proof / receipts)**
-In a single weekend, this room developed a driver for the Tandem Mobi, put a build of AAPS in the browser, and added remote commands. And the momentum does not stop when the weekend ends.
+In a single weekend, this room developed a driver for the Tandem Mobi, put a build of AAPS in the browser, and stood up a proof of concept for Nocturne, the next-generation Nightscout. And the momentum does not stop when the weekend ends.
 
 **S4 (sponsor value)**
 For a sponsor, that is rare air. Direct access to hard-to-find talent. Your brand beside a mission people are loyal to. Real impact, and it is tax-deductible.

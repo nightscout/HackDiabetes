@@ -105,9 +105,9 @@
     </style>
   </head>
   <body>
-    <div id="root" data-composition-id="main" data-start="0" data-duration="56" data-width="1080" data-height="1080">
+    <div id="root" data-composition-id="main" data-start="0" data-duration="59.5" data-width="1080" data-height="1080">
       <!-- single mixed audio track: continuous VO (Derya) + quiet music bed -->
-      <audio id="track" src="assets/final-audio.mp3" data-start="0" data-duration="56" data-track-index="9" data-volume="1"></audio>
+      <audio id="track" src="assets/final-audio.mp3" data-start="0" data-duration="59.5" data-track-index="9" data-volume="1"></audio>
 
       <div id="bg">
         <img id="bg-blob" src="assets/blob.svg" alt="" />
@@ -129,7 +129,7 @@
       <div id="progress"><div id="progress-fill"></div></div>
 
       <!-- BEAT 1 — hook -->
-      <div id="b1" class="beat clip" data-start="0" data-duration="4.86" data-track-index="1">
+      <div id="b1" class="beat clip" data-start="0" data-duration="5.02" data-track-index="1">
         <div class="inner">
           <div class="statrow"><div class="statnum g" id="s1a">75</div><div class="statlbl">people</div></div>
           <div class="statrow"><div class="statnum w" id="s1b">72</div><div class="statlbl">hours</div></div>
@@ -138,7 +138,7 @@
       </div>
 
       <!-- BEAT 2 — who -->
-      <div id="b2" class="beat clip" data-start="4.86" data-duration="9.36" data-track-index="1">
+      <div id="b2" class="beat clip" data-start="5.02" data-duration="8.90" data-track-index="1">
         <div class="photo" id="b2-photo1"><img src="assets/IMG_9706.png" alt="HackDiabetes participants" /></div>
         <div class="photo" id="b2-photo2" style="opacity:0"><img src="assets/IMG_1191.png" alt="Building at HackDiabetes" /></div>
         <div class="photo-scrim"></div>
@@ -149,20 +149,20 @@
       </div>
 
       <!-- BEAT 3 — proof -->
-      <div id="b3" class="beat clip" data-start="14.22" data-duration="12.32" data-track-index="1">
+      <div id="b3" class="beat clip" data-start="13.92" data-duration="14.60" data-track-index="1">
         <div class="inner">
           <div class="eyebrow" id="b3-eye"><span class="a">// one weekend</span> &nbsp; last year</div>
           <div class="rlist">
             <div class="ritem" id="r1"><div class="rcheck"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5 11-11.5" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="rtext"><b>Tandem Mobi</b> <span>— driver developed</span></div></div>
             <div class="ritem" id="r2"><div class="rcheck"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5 11-11.5" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="rtext"><b>AAPS</b> <span>— built in the browser</span></div></div>
-            <div class="ritem" id="r3"><div class="rcheck"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5 11-11.5" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="rtext"><b>Remote commands</b> <span>— shipped</span></div></div>
+            <div class="ritem" id="r3"><div class="rcheck"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5 11-11.5" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="rtext"><b>Nocturne</b> <span>— proof of concept established</span></div></div>
           </div>
           <div class="rmomentum" id="r-mom">— and the momentum hasn't stopped since.</div>
         </div>
       </div>
 
       <!-- BEAT 4 — value -->
-      <div id="b4" class="beat clip" data-start="26.54" data-duration="11.54" data-track-index="1">
+      <div id="b4" class="beat clip" data-start="28.52" data-duration="11.94" data-track-index="1">
         <div class="inner">
           <div class="eyebrow" id="b4-eye"><span class="a">// why sponsor</span></div>
           <div class="vcards">
@@ -174,7 +174,7 @@
       </div>
 
       <!-- BEAT 5 — intimacy / flexibility -->
-      <div id="b5" class="beat clip" data-start="38.08" data-duration="10.82" data-track-index="1">
+      <div id="b5" class="beat clip" data-start="40.46" data-duration="11.54" data-track-index="1">
         <div class="inner">
           <div class="h1" id="b5-head"><span class="ln">No booth crush.</span><span class="ln"><span class="g">Real conversations.</span></span></div>
           <div class="tailored" id="b5-sub">From cloud credits to lead partner — we tailor it to you.</div>
@@ -182,7 +182,7 @@
       </div>
 
       <!-- BEAT 6 — CTA -->
-      <div id="b6" class="beat clip" data-start="48.9" data-duration="7.1" data-track-index="1">
+      <div id="b6" class="beat clip" data-start="52.0" data-duration="7.5" data-track-index="1">
         <div class="inner">
           <img id="cta-molecule" src="assets/hackdiabetes-logo.png" alt="HackDiabetes" />
           <div id="cta-head"><span class="ln">Let's build something</span><span class="ln o">worth sponsoring.</span></div>
@@ -196,8 +196,8 @@
     <script>
       window.__timelines = window.__timelines || {};
       const tl = gsap.timeline({ paused: true });
-      const DUR = 56;
-      const T = { b1: 0, b2: 4.86, b3: 14.22, b4: 26.54, b5: 38.08, b6: 48.9 };
+      const DUR = 59.5;
+      const T = { b1: 0, b2: 5.02, b3: 13.92, b4: 28.52, b5: 40.46, b6: 52.0 };
 
       /* persistent progress + bg drift */
       tl.fromTo("#progress-fill", { scaleX: 0 }, { scaleX: 1, duration: DUR, ease: "none" }, 0);
@@ -211,44 +211,44 @@
       }
 
       /* BEAT 1 — stats rise in */
-      beatFade("#b1 .inner", T.b1, 4.86);
+      beatFade("#b1 .inner", T.b1, 5.02);
       tl.fromTo("#s1a", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power4.out" }, T.b1 + 0.2);
       tl.fromTo("#s1b", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power4.out" }, T.b1 + 0.55);
       tl.fromTo("#s1c", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power4.out" }, T.b1 + 0.9);
 
       /* BEAT 2 — photo + head + roles; crossfade photo1→photo2 */
-      beatFade("#b2 .inner", T.b2, 9.36);
-      tl.fromTo("#b2-photo1 img", { scale: 1.12 }, { scale: 1.0, duration: 9.36, ease: "sine.out" }, T.b2);
-      tl.fromTo("#b2-photo2 img", { scale: 1.12 }, { scale: 1.0, duration: 6.0, ease: "sine.out" }, T.b2 + 5.0);
-      tl.to("#b2-photo2", { opacity: 1, duration: 1.2, ease: "power1.inOut" }, T.b2 + 5.2);
+      beatFade("#b2 .inner", T.b2, 8.90);
+      tl.fromTo("#b2-photo1 img", { scale: 1.12 }, { scale: 1.0, duration: 8.90, ease: "sine.out" }, T.b2);
+      tl.fromTo("#b2-photo2 img", { scale: 1.12 }, { scale: 1.0, duration: 5.0, ease: "sine.out" }, T.b2 + 4.4);
+      tl.to("#b2-photo2", { opacity: 1, duration: 1.2, ease: "power1.inOut" }, T.b2 + 4.6);
       tl.fromTo("#b2-head", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, T.b2 + 0.5);
       gsap.utils.toArray("#b2-roles span").forEach((el, i) => {
         tl.to(el, { opacity: 1, duration: 0.3, ease: "power2.out" }, T.b2 + 1.6 + i * 0.85);
       });
 
       /* BEAT 3 — receipts accumulate, synced to VO mentions */
-      beatFade("#b3 .inner", T.b3, 12.32);
+      beatFade("#b3 .inner", T.b3, 14.60);
       tl.fromTo("#b3-eye", { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, T.b3 + 0.3);
       const rItems = ["#r1", "#r2", "#r3"];
-      const rTimes = [3.15, 5.2, 7.5]; // synced to "Tandem Mobi" / "AAPS" / "remote commands"
+      const rTimes = [2.9, 4.85, 8.45]; // synced to "Tandem Mobi" / "AAPS" / "Nocturne"
       rItems.forEach((id, i) => {
         tl.fromTo(id, { x: -40, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.5, ease: "power3.out" }, T.b3 + rTimes[i]);
         tl.fromTo(id + " .rcheck", { scale: 0, rotation: -30 }, { scale: 1, rotation: 0, duration: 0.5, ease: "back.out(2.2)" }, T.b3 + rTimes[i] + 0.15);
       });
-      tl.fromTo("#r-mom", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, T.b3 + 9.0);
+      tl.fromTo("#r-mom", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, T.b3 + 11.5);
 
       /* BEAT 4 — value cards stagger with VO */
-      beatFade("#b4 .inner", T.b4, 11.54);
+      beatFade("#b4 .inner", T.b4, 11.94);
       tl.fromTo("#b4-eye", { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: "power3.out" }, T.b4 + 0.3);
       const vCards = ["#v1", "#v2", "#v3"];
-      const vTimes = [2.6, 5.4, 8.2]; // synced to "Direct access" / "Your brand" / "Real impact"
+      const vTimes = [2.5, 5.3, 8.3]; // synced to "Direct access" / "Your brand" / "Real impact"
       vCards.forEach((id, i) => {
         tl.fromTo(id, { x: 44, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.55, ease: "power3.out" }, T.b4 + vTimes[i]);
       });
 
       /* BEAT 5 — statement + tailored line */
-      beatFade("#b5 .inner", T.b5, 10.82);
-      tl.fromTo("#b5-head", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power4.out" }, T.b5 + 1.3);
+      beatFade("#b5 .inner", T.b5, 11.54);
+      tl.fromTo("#b5-head", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power4.out" }, T.b5 + 2.3);
       tl.fromTo("#b5-sub", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, T.b5 + 6.2);
 
       /* BEAT 6 — CTA (holds to end, no fade-out) */

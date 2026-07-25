@@ -28,7 +28,7 @@ real, tax-deductible impact (501c3) · in-kind to lead-sponsor flexibility.
 ## Structure (6 beats, timed to VO segments — see SCRIPT.md)
 1. Hook: 75 people, 72 hours, one room.
 2. Who: the people who move diabetes tech forward (ballroom photo).
-3. Proof: Tandem Mobi driver · AAPS in-browser · remote commands · + momentum.
+3. Proof: Tandem Mobi driver · AAPS in-browser · Nocturne PoC established · + momentum.
 4. Sponsor value: direct access · hard-to-find talent · measurable, tax-deductible impact.
 5. Intimacy/flex: under 75 builders · no booth crush · tailored, in-kind to lead partner.
 6. CTA: Become a sponsor → hackdiabetes.io/sponsorship + sponsorships@nightscoutfoundation.org.
