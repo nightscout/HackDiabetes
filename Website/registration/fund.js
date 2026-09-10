@@ -4,9 +4,10 @@
    #fundLeft. Styling lives in fund.css.
 
    Renders immediately from the FUNDRAISING_* values in config.js, then
-   refreshes from the Apps Script endpoint if FUNDRAISING_URL is set. That
-   endpoint returns only two aggregate numbers — the finance sheet itself
-   stays private. See Website/apps-script/README.md.
+   refreshes from FUNDRAISING_URL if it is set. That is a static JSON file
+   baked into the site by the deploy workflow, which reads the finance sheet
+   once a day via Apps Script — so page views cost no script quota and the
+   sheet itself stays private. See Website/apps-script/README.md.
 
    Exits quietly on pages with no .fund block.
    ═══════════════════════════════════════════════════════════════════════ */
@@ -55,8 +56,9 @@
     render(raised);
 
     if (!URL) return;
-    fetch(URL)
+    fetch(URL, { cache: "no-cache" })
         .then(function (r) {
+            if (!r.ok) throw new Error("HTTP " + r.status);
             return r.json();
         })
         .then(function (d) {

@@ -7,12 +7,16 @@ var INTEREST_OPEN = true;
 // Goal shown on the home-page progress bar.
 var FUNDRAISING_GOAL = 75000;
 
-// Fallback total, used for the first paint and if the live fetch fails.
+// Fallback total, used for the first paint and if the daily fetch fails.
 // Source: "2026 Hackathon In-Person Finances" → Fundraising tab → H22.
-// Keep roughly in sync; the live endpoint below is the source of truth.
+// Keep roughly in sync; the spreadsheet is the source of truth.
 var FUNDRAISING_RAISED = 28980;
 
-// Apps Script Web App that returns {"raised":<number>,"goal":<number>}.
-// Leave "" to run on FUNDRAISING_RAISED alone. Deploy instructions:
-// Website/apps-script/README.md
-var FUNDRAISING_URL = "https://script.google.com/macros/s/AKfycbxJE-tvgXNOTUdw6fIYNWOusg1k3OnCT0UnRDtDQoYzDgOQYD87bNlroxlIjYTIzYYxkw/exec";
+// Where the browser reads the total from. This is a static file baked into
+// the site by the deploy workflow, which calls the Apps Script endpoint once
+// a day -- so visitors never hit the script and it costs no quota per view.
+// Generated at deploy time and not committed; missing or stale file simply
+// falls back to FUNDRAISING_RAISED above.
+// The endpoint itself lives in .github/workflows/deploy-registration.yml.
+// See Website/apps-script/README.md.
+var FUNDRAISING_URL = "fundraising.json";

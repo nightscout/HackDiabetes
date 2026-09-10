@@ -1,0 +1,4 @@
+# Fundraising total, generated at deploy time by the Fetch fundraising total
+# step in .github/workflows/deploy-registration.yml. Never commit it -- the
+# checked-in fallback lives in Website/registration/config.js.
+Website/registration/fundraising.json

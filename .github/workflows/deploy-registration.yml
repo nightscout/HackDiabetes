@@ -5,6 +5,11 @@ on:
     branches: [main]
     paths:
       - 'Website/registration/**'
+  # Refresh the fundraising total once a day. This is the ONLY thing that
+  # calls the Apps Script endpoint -- visitors read the baked-in JSON, so
+  # public traffic never touches the script or its quota.
+  schedule:
+    - cron: '0 13 * * *'
   workflow_dispatch:
 
 permissions:
@@ -16,6 +21,11 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+env:
+  # Public endpoint -- returns only {"raised":<number>,"goal":<number>}.
+  # See Website/apps-script/README.md.
+  FUNDRAISING_SCRIPT_URL: https://script.google.com/macros/s/AKfycbxJE-tvgXNOTUdw6fIYNWOusg1k3OnCT0UnRDtDQoYzDgOQYD87bNlroxlIjYTIzYYxkw/exec
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -25,6 +35,33 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      # Never fail the deploy over this. If the fetch or the validation
+      # fails, no fundraising.json is written and the bar falls back to
+      # FUNDRAISING_RAISED in config.js.
+      - name: Fetch fundraising total
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          out=Website/registration/fundraising.json
+
+          if ! curl -sSfL --max-time 30 --retry 2 --retry-delay 5 \
+                 "$FUNDRAISING_SCRIPT_URL" -o /tmp/fundraising.raw; then
+            echo "::warning::Fundraising fetch failed; site will use the config.js fallback."
+            exit 0
+          fi
+
+          # Only publish a payload that actually carries a numeric total.
+          if ! jq -e '(.raised | type == "number") and (.raised >= 0)' \
+                 /tmp/fundraising.raw >/dev/null 2>&1; then
+            echo "::warning::Endpoint returned no usable \"raised\" value; using the config.js fallback."
+            echo "::warning::Payload keys: $(jq -r 'keys | join(",")' /tmp/fundraising.raw 2>/dev/null || echo 'unparseable')"
+            exit 0
+          fi
+
+          jq -c '{raised: .raised, goal: .goal, fetched: (now | todate)}' \
+            /tmp/fundraising.raw > "$out"
+          echo "Published $(cat "$out")"
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v3
