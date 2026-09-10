@@ -15,4 +15,4 @@ var FUNDRAISING_RAISED = 28980;
 // Apps Script Web App that returns {"raised":<number>,"goal":<number>}.
 // Leave "" to run on FUNDRAISING_RAISED alone. Deploy instructions:
 // Website/apps-script/README.md
-var FUNDRAISING_URL = "";
+var FUNDRAISING_URL = "https://script.google.com/macros/s/AKfycbxJE-tvgXNOTUdw6fIYNWOusg1k3OnCT0UnRDtDQoYzDgOQYD87bNlroxlIjYTIzYYxkw/exec";
