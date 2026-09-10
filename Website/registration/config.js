@@ -10,7 +10,8 @@ var FUNDRAISING_GOAL = 75000;
 // Fallback total, used for the first paint and if the daily fetch fails.
 // Source: "2026 Hackathon In-Person Finances" → Fundraising tab → H22.
 // Keep roughly in sync; the spreadsheet is the source of truth.
-var FUNDRAISING_RAISED = 28980;
+// Last synced 2026-09-10.
+var FUNDRAISING_RAISED = 30230;
 
 // Where the browser reads the total from. This is a static file baked into
 // the site by the deploy workflow, which calls the Apps Script endpoint once
