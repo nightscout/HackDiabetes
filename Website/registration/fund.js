@@ -15,7 +15,7 @@
         typeof FUNDRAISING_GOAL !== "undefined" ? FUNDRAISING_GOAL : 75000;
     var raised =
         typeof FUNDRAISING_RAISED !== "undefined" ? FUNDRAISING_RAISED : 0;
-    var URL = typeof FUNDRAISING_URL !== "undefined" ? FUNDRAISING_URL : "https://script.google.com/macros/s/AKfycbxJE-tvgXNOTUdw6fIYNWOusg1k3OnCT0UnRDtDQoYzDgOQYD87bNlroxlIjYTIzYYxkw/exec";
+    var URL = typeof FUNDRAISING_URL !== "undefined" ? FUNDRAISING_URL : "";
 
     var elPct = document.getElementById("fundPct");
     var elFill = document.getElementById("fundFill");
