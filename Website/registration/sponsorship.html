@@ -65,6 +65,7 @@
         footer a { color: rgba(255,255,255,.4); text-decoration: none; }
         footer a:hover { color: var(--orange); }
     </style>
+    <link rel="stylesheet" href="fund.css" />
     <script src="config.js"></script>
 </head>
 <body>
@@ -93,6 +94,26 @@
     <h1>Sponsor<br>HackDiabetes 26</h1>
     <p>A small, focused, in-person hackathon. Under 75 participants. Real conversations, real builders, real impact.</p>
     <p class="tax">As a registered 501(c)(3) nonprofit, your contribution may be tax-deductible.</p>
+
+    <!-- ── FUNDRAISING THERMOMETER ── -->
+    <div class="fund fund--hero-bottom">
+        <div class="fund-label">
+            <span>Help us get there</span>
+            <div class="dot"></div>
+            <span class="fund-pct" id="fundPct">0%</span>
+            <span>funded</span>
+        </div>
+        <a class="fund-cta" href="https://donate.hackdiabetes.io" target="_blank" rel="noopener">&#9829; Donate &rarr;</a>
+        <div class="fund-track" role="progressbar" aria-label="HackDiabetes 26 fundraising progress" aria-valuemin="0" aria-valuemax="75000" aria-valuenow="0" id="fundTrack">
+            <div class="fund-fill" id="fundFill"></div>
+        </div>
+        <div class="fund-amt">
+            <strong id="fundRaised">&mdash;</strong> raised of <span id="fundGoal">$75,000</span> goal
+        </div>
+        <div class="fund-left">
+            <strong id="fundLeft">&mdash;</strong> still to raise
+        </div>
+    </div>
 </div>
 
 <div class="main">
@@ -298,5 +319,6 @@
     <p>HackDiabetes 26 · Nov 14–16, 2026 · The Nightscout Foundation · <a href="https://www.marriott.com/en-us/hotels/yvrjw-jw-marriott-parq-vancouver/overview/" target="_blank">JW Marriott Parq Vancouver</a></p>
 </footer>
 
+<script src="fund.js"></script>
 </body>
 </html>

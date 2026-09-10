@@ -132,7 +132,7 @@
                 background: var(--dark) url(./images/blob.svg) no-repeat;
                 background-size: cover;
                 background-position: 50% 100%;
-                padding: 4rem 2.5rem 5rem;
+                padding: 2rem 2.5rem 5rem;
                 position: relative;
                 overflow: hidden;
             }
@@ -998,6 +998,7 @@
                 line-height: 1.6;
             }
         </style>
+        <link rel="stylesheet" href="fund.css" />
         <script src="config.js"></script>
     </head>
     <body>
@@ -1031,6 +1032,41 @@
         </header>
 
         <section class="hero" id="home">
+            <!-- ── FUNDRAISING THERMOMETER ── -->
+            <div class="fund fund--hero-top">
+                <div class="fund-label">
+                    <span>Help us get there</span>
+                    <div class="dot"></div>
+                    <span class="fund-pct" id="fundPct">0%</span>
+                    <span>funded</span>
+                </div>
+                <a
+                    class="fund-cta"
+                    href="https://donate.hackdiabetes.io"
+                    target="_blank"
+                    rel="noopener"
+                    >&#9829; Donate &rarr;</a
+                >
+                <div
+                    class="fund-track"
+                    role="progressbar"
+                    aria-label="HackDiabetes 26 fundraising progress"
+                    aria-valuemin="0"
+                    aria-valuemax="75000"
+                    aria-valuenow="0"
+                    id="fundTrack"
+                >
+                    <div class="fund-fill" id="fundFill"></div>
+                </div>
+                <div class="fund-amt">
+                    <strong id="fundRaised">&mdash;</strong> raised of
+                    <span id="fundGoal">$75,000</span> goal
+                </div>
+                <div class="fund-left">
+                    <strong id="fundLeft">&mdash;</strong> still to raise
+                </div>
+            </div>
+
             <div class="hero-inner">
                 <div class="hero-eyebrow">
                     <span>JW Marriott Parq Vancouver</span>
@@ -1660,5 +1696,6 @@
                     .catch(function () {});
             })();
         </script>
+        <script src="fund.js"></script>
     </body>
 </html>

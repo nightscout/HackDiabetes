@@ -1,0 +1,163 @@
+/* ══ HackDiabetes 26 — fundraising thermometer ══════════════════════════════
+   Shared by index.html and sponsorship.html. Behaviour lives in fund.js;
+   the numbers come from the FUNDRAISING_* values in config.js.
+
+   Colours are declared locally on .fund rather than read from each page's
+   :root, so the component drops onto any page unchanged.
+
+   Placement is the host page's job — use a modifier:
+     .fund--hero-top     bar above hero copy (home page)
+     .fund--hero-bottom  centred block under hero copy (sponsorship page)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.fund {
+    --fund-green: #27c55e;
+    --fund-green2: #1ea34f;
+    --fund-orange: #f05a3e;
+
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+        "label cta"
+        "track track"
+        "amt   left";
+    align-items: center;
+    row-gap: 0.7rem;
+    column-gap: 1rem;
+}
+.fund-label {
+    grid-area: label;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.fund-label span {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+}
+.fund-label .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--fund-orange);
+    flex: 0 0 auto;
+}
+.fund-label .fund-pct {
+    color: var(--fund-green);
+    font-weight: 800;
+}
+.fund-cta {
+    grid-area: cta;
+    justify-self: end;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--fund-orange);
+    text-decoration: none;
+    border: 1.5px solid rgba(240, 90, 62, 0.45);
+    border-radius: 7px;
+    padding: 7px 16px;
+    white-space: nowrap;
+    transition:
+        background 0.15s,
+        border-color 0.15s,
+        color 0.15s;
+}
+.fund-cta:hover {
+    background: var(--fund-orange);
+    border-color: var(--fund-orange);
+    color: #fff;
+}
+.fund-track {
+    grid-area: track;
+    position: relative;
+    height: 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+.fund-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(
+        90deg,
+        var(--fund-green2),
+        var(--fund-green)
+    );
+    box-shadow: 0 0 16px rgba(39, 197, 94, 0.45);
+    transition: width 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.fund-amt {
+    grid-area: amt;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.4);
+}
+.fund-amt strong {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--fund-green);
+    letter-spacing: -0.02em;
+    margin-right: 4px;
+}
+.fund-left {
+    grid-area: left;
+    justify-self: end;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.3);
+    white-space: nowrap;
+}
+.fund-left strong {
+    color: rgba(255, 255, 255, 0.65);
+    font-weight: 800;
+}
+@media (max-width: 720px) {
+    .fund {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "label"
+            "track"
+            "amt"
+            "left"
+            "cta";
+        row-gap: 0.6rem;
+    }
+    .fund-cta {
+        justify-self: start;
+        margin-top: 0.3rem;
+    }
+    .fund-left {
+        justify-self: start;
+    }
+    .fund-amt strong {
+        font-size: 19px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .fund-fill {
+        transition: none;
+    }
+}
+
+/* ── PLACEMENT MODIFIERS ── */
+.fund--hero-top {
+    margin-bottom: 2.25rem;
+}
+.fund--hero-bottom {
+    max-width: 760px;
+    margin: 2.75rem auto 0;
+    text-align: left;
+}
