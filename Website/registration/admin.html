@@ -146,6 +146,15 @@
     .refresh-icon { font-size: 14px; display: inline-block; }
     .refresh-icon.spinning { animation: spin .6s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    .btn-sm:disabled { opacity: .5; cursor: default; }
+    .btn-sm:disabled:hover { background: var(--dark3); }
+    .thermo-status {
+      font-size: 11px;
+      color: rgba(255,255,255,.4);
+      white-space: nowrap;
+    }
+    .thermo-status.ok { color: #27c55e; }
+    .thermo-status.warn { color: #fbbf24; }
 
     /* ── TABS ── */
     .tabs {
@@ -468,6 +477,11 @@
       <span class="header-title">Admin</span>
     </div>
     <div class="header-right">
+      <span class="thermo-status" id="thermoStatus"></span>
+      <button class="btn-sm" id="thermoBtn" onclick="refreshThermometer()"
+              title="Rebuild the public site so the fundraising bar picks up the latest spreadsheet total">
+        <span class="refresh-icon" id="thermoIcon">🌡</span> Update thermometer
+      </button>
       <button class="btn-sm" onclick="refreshCurrentTab()">
         <span class="refresh-icon" id="refreshIcon">↻</span> Refresh
       </button>
@@ -640,6 +654,7 @@
   function showMainUI() {
     document.getElementById('mainUI').style.display = 'block';
     loadRooms();
+    showPublishedTotal();
   }
 
   // ── Tabs ──────────────────────────────────────────────────────────────────
@@ -1303,6 +1318,146 @@
         btn.disabled = false;
         alert('Network error');
       });
+  }
+
+  // ── Fundraising thermometer ───────────────────────────────────────────────
+  // The public bar reads a static fundraising.json baked in at deploy time, so
+  // the spreadsheet total only reaches the site when the deploy workflow runs
+  // (daily, or on demand). This button asks the Apps Script to dispatch that
+  // workflow, then watches fundraising.json until the new value appears.
+  //
+  // The GitHub token lives in the Apps Script's Script Properties, never here:
+  // admin.html is served publicly, so anything in this file is public too.
+  // See Website/apps-script/README.md.
+
+  var THERMO_JSON = '/fundraising.json';
+  var THERMO_POLL_MS = 5000;
+  var THERMO_POLL_LIMIT = 36; // ~3 minutes
+  var THERMO_SAFETY_MS = 240000; // hard ceiling, longer than the poll window
+  var thermoPollTimer = null;
+  var thermoSafetyTimer = null;
+
+  function thermoSay(msg, kind) {
+    var el = document.getElementById('thermoStatus');
+    el.textContent = msg || '';
+    el.className = 'thermo-status' + (kind ? ' ' + kind : '');
+  }
+
+  function thermoMoney(n) {
+    return '$' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  // Reads the currently published total. Resolves null when there is no file
+  // yet or it cannot be parsed -- the public bar falls back to config.js then.
+  function readPublishedTotal() {
+    return fetch(THERMO_JSON + '?cb=' + Date.now(), { cache: 'no-store' })
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(d) {
+        var n = d ? parseFloat(d.raised) : NaN;
+        return isFinite(n) ? { raised: n, fetched: d.fetched || '' } : null;
+      })
+      .catch(function() { return null; });
+  }
+
+  function showPublishedTotal() {
+    readPublishedTotal().then(function(cur) {
+      if (!cur) { thermoSay('Bar is on its fallback value', 'warn'); return; }
+      thermoSay('Bar shows ' + thermoMoney(cur.raised));
+    });
+  }
+
+  function thermoReset() {
+    if (thermoPollTimer) { clearInterval(thermoPollTimer); thermoPollTimer = null; }
+    if (thermoSafetyTimer) { clearTimeout(thermoSafetyTimer); thermoSafetyTimer = null; }
+    document.getElementById('thermoIcon').classList.remove('spinning');
+    document.getElementById('thermoBtn').disabled = false;
+  }
+
+  // fetch() has no timeout of its own, so a request that never settles would
+  // otherwise leave the button disabled until the page is reloaded.
+  function thermoArmSafety() {
+    if (thermoSafetyTimer) clearTimeout(thermoSafetyTimer);
+    thermoSafetyTimer = setTimeout(function() {
+      thermoSafetyTimer = null;
+      thermoReset();
+      thermoSay('Timed out — check Actions', 'warn');
+    }, THERMO_SAFETY_MS);
+  }
+
+  function refreshThermometer() {
+    var btn = document.getElementById('thermoBtn');
+    if (btn.disabled) return;
+
+    btn.disabled = true;
+    document.getElementById('thermoIcon').classList.add('spinning');
+    thermoSay('Requesting rebuild…');
+    thermoArmSafety();
+
+    // Snapshot what is live now so we can tell when the new value lands.
+    readPublishedTotal().then(function(before) {
+      // Apps Script only exposes doGet, so this state-changing call has to be
+      // a GET. Without no-store the browser will happily replay a cached
+      // {ok:true} and the button reports success having dispatched nothing.
+      return fetch(AVAILABILITY_URL + '?action=refreshFundraising&adminToken=' +
+                   encodeURIComponent(adminToken || '') + '&cb=' + Date.now(),
+                   { cache: 'no-store' })
+        .then(function(r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
+        .then(function(data) {
+          if (data.error === 'unauthorized') { handleUnauthorized(); return; }
+
+          if (data.error === 'not_configured') {
+            thermoReset();
+            thermoSay('Not set up yet — see apps-script/README', 'warn');
+            return;
+          }
+          if (data.error === 'cooldown') {
+            thermoReset();
+            var secs = data.retryAfterSeconds || 120;
+            thermoSay('Just ran — try again in ' + secs + 's', 'warn');
+            return;
+          }
+          if (!data.ok) {
+            thermoReset();
+            thermoSay('Rebuild request failed' + (data.status ? ' (' + data.status + ')' : ''), 'warn');
+            return;
+          }
+
+          thermoSay('Rebuilding site…');
+          watchForNewTotal(before);
+        });
+    })
+    .catch(function() {
+      thermoReset();
+      thermoSay('Network error — try again', 'warn');
+    });
+  }
+
+  // Poll the published file until the total changes, so the button reports
+  // what actually went live rather than just that the request was accepted.
+  function watchForNewTotal(before) {
+    var tries = 0;
+    thermoPollTimer = setInterval(function() {
+      tries++;
+      readPublishedTotal().then(function(cur) {
+        var landed = cur && (!before
+          || cur.raised !== before.raised
+          || (cur.fetched && cur.fetched !== before.fetched));
+
+        if (landed) {
+          thermoReset();
+          thermoSay('Live now: ' + thermoMoney(cur.raised), 'ok');
+          return;
+        }
+        if (tries >= THERMO_POLL_LIMIT) {
+          thermoReset();
+          // The deploy may still be queued; this is a timeout, not a failure.
+          thermoSay('Still building — check Actions', 'warn');
+        }
+      });
+    }, THERMO_POLL_MS);
   }
 
   // ── Boot ──────────────────────────────────────────────────────────────────

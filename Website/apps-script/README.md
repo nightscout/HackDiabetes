@@ -58,11 +58,75 @@ The schedule and the endpoint URL both live in
    (`FUNDRAISING_URL` in `config.js` is a different thing — it points the
    browser at the generated `fundraising.json`, not at the script.)
 
+## The "Update thermometer" button
+
+`admin.html` has an **Update thermometer** button for when the total needs to
+be live sooner than the next daily run. It shows what the bar is currently
+publishing, and after a rebuild it watches `fundraising.json` and reports the
+value that actually went live — so it confirms the result rather than just
+saying the request was sent. Expect roughly a minute.
+
+The chain is: button → admin Apps Script → GitHub `workflow_dispatch` →
+deploy re-reads the sheet → Pages republishes.
+
+### Why the GitHub token goes in Apps Script
+
+`admin.html` is served publicly from hackdiabetes.io. Its password prompt is a
+convenience; the file itself is world-readable, so **no token can ever live in
+it**. The real authority is the Apps Script, which validates `adminToken`
+server-side. The GitHub token sits in that project's Script Properties, where
+the browser can never see it.
+
+### Setup (one time)
+
+1. **Create a fine-grained token.** GitHub → *Settings → Developer settings →
+   Personal access tokens → Fine-grained tokens → Generate new token*.
+   - **Resource owner:** `nightscout`
+   - **Repository access:** *Only select repositories* → `nightscout/HackDiabetes`
+   - **Repository permissions:** *Actions: Read and write*. Nothing else — this
+     token must not be able to push code.
+   - An org-owned repo may need an org owner to approve the token before it
+     works.
+
+2. **Store it in the admin Apps Script.** Open the registration/admin script
+   (the one behind `AVAILABILITY_URL`), then *Project Settings → Script
+   properties → Add script property*:
+   - Property: `GITHUB_DISPATCH_TOKEN`
+   - Value: the token
+
+3. **Add the action.** Paste
+   [`admin-refresh-fundraising.gs`](admin-refresh-fundraising.gs) into that
+   project and wire `refreshFundraising()` into `doGet` behind the same
+   adminToken check the other admin actions use. The file has an example.
+
+4. **Redeploy** the script so the new action is live. Existing deployment
+   URLs stay valid.
+
+Until step 2 and 3 are done the button is harmless: it reports
+*"Not set up yet"* and changes nothing.
+
+### Things to know
+
+- **Token expiry.** Fine-grained tokens expire. When it lapses, the button
+  reports a failure with status 401 and the daily cron keeps working normally.
+  Worth a calendar reminder at whatever expiry you choose.
+- **Who can press it.** Anyone with the admin password can trigger a deploy.
+  They can already send invites and delete registrations, so this is not a new
+  level of trust — but note that the token's blast radius is Actions on this
+  one repo, and it cannot modify code.
+- **Throttle.** The script refuses a second dispatch within 120 seconds, and
+  the workflow's `concurrency: pages` group cancels an in-flight deploy if
+  another starts, so double-clicking cannot pile up deploys.
+- **It rebuilds the whole site,** not just the number. That is the same deploy
+  that runs on any push, so it is safe — but it does publish whatever is
+  currently on `main`.
+
 ## Updating the total
 
 Nothing to do — edit the spreadsheet as usual and the site picks it up on the
-next daily run. To publish it sooner, run the **Deploy registration site to
-GitHub Pages** workflow manually from the Actions tab.
+next daily run. To publish it sooner, press **Update thermometer** in the admin
+dashboard, or run the **Deploy registration site to GitHub Pages** workflow
+manually from the Actions tab.
 
 Keep `FUNDRAISING_RAISED` in `registration/config.js` loosely in sync anyway: it
 is what renders on first paint, before the JSON loads, and whenever the daily
