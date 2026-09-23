@@ -197,7 +197,9 @@
                 <h1>Register your<br><span class="accent">interest.</span></h1>
                 <p id="regStatusText"></p>
                 <script>
-                  document.getElementById('regStatusText').textContent = (typeof INTEREST_OPEN !== 'undefined' ? INTEREST_OPEN : true)
+                  document.getElementById('regStatusText').textContent = (typeof REGISTRATION_CLOSED !== 'undefined' && REGISTRATION_CLOSED)
+                    ? 'Registrations are now closed — HackDiabetes 26 is fully booked.'
+                    : (typeof INTEREST_OPEN !== 'undefined' ? INTEREST_OPEN : true)
                     ? 'Registration is now open — we are looking forward to your submissions.'
                     : 'Registration isn\'t open yet — let us know you\'re interested and we\'ll be in touch when spots become available.';
                 </script>
@@ -405,6 +407,11 @@
             // INTEREST_OPEN from config.js — default true if not defined (safe fallback)
             var interestOpen = (typeof INTEREST_OPEN !== "undefined") ? INTEREST_OPEN : true;
             if (!interestOpen && !previewMode) {
+                if (typeof REGISTRATION_CLOSED !== "undefined" && REGISTRATION_CLOSED) {
+                    var banner = document.getElementById("interestClosedBanner");
+                    banner.querySelector("h2").innerHTML = "Registrations<br>are closed.";
+                    banner.querySelector("p").textContent = "HackDiabetes 26 is fully booked — thank you to everyone who registered. If you have an invite link, you can still use it to complete your registration.";
+                }
                 document.getElementById("interestClosedBanner").style.display = "block";
                 document.getElementById("formCard").style.display = "none";
             }

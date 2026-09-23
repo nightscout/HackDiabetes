@@ -1589,7 +1589,12 @@
                         typeof INTEREST_OPEN !== "undefined"
                             ? INTEREST_OPEN
                             : true;
-                    if (!_io2) {
+                    if (typeof REGISTRATION_CLOSED !== "undefined" && REGISTRATION_CLOSED) {
+                        document.getElementById("ctaHeading").textContent =
+                            "Registrations are closed.";
+                        document.getElementById("ctaBody").textContent =
+                            "HackDiabetes 26 is fully booked — thank you to everyone who registered. We can’t wait to see you in Vancouver!";
+                    } else if (!_io2) {
                         document.getElementById("ctaHeading").textContent =
                             "Coming soon.";
                         document.getElementById("ctaBody").textContent =
@@ -1654,6 +1659,7 @@
                         Object.keys(counts).forEach(function (key) {
                             totalFree += Math.max(0, BEDS - (counts[key] || 0));
                         });
+                        if (typeof REGISTRATION_CLOSED !== "undefined" && REGISTRATION_CLOSED) totalFree = 0;
                         var el = document.getElementById("heroFree");
                         if (el) el.textContent = totalFree;
                     })
